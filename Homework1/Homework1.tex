@@ -1,0 +1,66 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{makeidx}
+\usepackage{graphicx}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage[hidelinks]{hyperref}
+\author{Bert Peters}
+\title{Homework 1}
+\begin{document}
+\maketitle
+
+\section{Scheduling conflicts}
+
+I had a conflict that prevented me from attending the first lecture, due to a meeting for the teaching assistants for the Operating Systems course. This was a one time thing, and I do not expect any further scheduling conflicts.
+
+\section{Components in WWW search systems}
+
+I can discern 3 main components in WWW search systems:
+
+\begin{itemize}
+
+\item A retrieval system. This system is responsible for getting the information from external sources. It should distribute the requests to external sources that no sources are queried too much, but still index the entire source. It could also clean up the retrieved data somewhat, so that it is easier to index.
+
+\item An indexing system, storing the retrieved data in a structured manner. It should link resources to concepts, whether it is keywords, or actual logical concepts. 
+
+\item A weighting system, determining the relative importance of the resources. This is necessary to rank the individual results in a result set. Page rank is a widely known example of this, but any network centrality measure could be used.
+\end{itemize}
+
+Arguably, a display component can be considered as well, but that is rather trivial when you already consider the above components.
+
+\section{Implementing components}
+
+For the retrieval system, you typically want some spider program that can visit web pages and simply follow all links on that page. It should then queue all of the links it has not visited (or queued) for retrieval and continue this process ad infinitum. Since retrieving data is not that much of a CPU intensive process, you have some asynchronous retrieval system that can perform many requests at the same time and a synchronous process that handles the responses as they come in.
+
+For the indexing system, you need a quick way of looking up certain records related to concepts. A simple way to do this is to store your concepts and records in some SQL database and link them with a junction table, adding indices where appropriate. Really though, anything that can offer something like $O (\log n)$ complexity for lookups is nice. Anything else probably will not deal well with the volume of data.
+
+As mentioned above, the weighting system needs to determine relative importance of records. This can be done using any of the various graph centrality measures. Most centrality measures are $O(n^2)$ to compute, so approximations need to be made.
+
+\section{Unsolved problems searching for WWW information}
+
+\begin{description}
+\item[The natural language problem.] A computer needs to know what you mean, but natural language is hard, with its ambiguities and nuances. This has been partially solved by training users for the last few decades that they need to talk some weird haikus to search engines, but that still does not solve homonyms and related issues.
+
+\item[Spam prevention.] As long as there have been search engines, there have been websites trying to exploit flaws in the ranking algorithms. When Altavista ranked you based on how frequent a word was on your page, pages became filled with hidden text. Googles page rank has introduced paid links.
+
+\item[Unstructured data.] The web is full of ``natural'' content, but the information is generally more useful when structured. It is difficult to extract such structured data from unstructured sources.\footnote{This is actually partially solved with the introduction of data annotations based on \url{https://schema.org/}.}
+\end{description}
+
+\section{Personal search problems}
+
+\begin{description}
+\item[Controlling your search bubble] Search engines heavily personalize your search results to what they think is you. This is really great when it allows me to search for topics related to \LaTeX~and  not be questioned about the results  not being suitable for university computers, but in other cases it is rather dangerous, especially in political discourse.
+
+Services like duckduckgo enable you to have no bubble, but a controllable bubble would be even better.
+
+\item[Credibility of sources] Search engines have crawled a huge amount of sources, and not all of them are credible. Most notably, some websites are high on the search results page but offer no content whatsoever.\footnote{A notable example is \url{http://installion.co.uk}, which offers ``tutorials'' for installing things without any useful content, yet they are the top result when looking for such tutorials.} It would be nice if you could easily flag them as useless.
+
+\item[Topical searches] Most general purpose search engines only have keywords, which works fine, but search terms often belong to multiple fields, this can be problematic.
+
+It would be great to be able to specify ``I am currently looking for internet security things'' and then search for shellshock without finding anything about the physical phenomenon.
+\end{description}
+
+\end{document}
