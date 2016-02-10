@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# Generatables
+*.pdf
+
+# Swap files
+*.swp
