@@ -100,7 +100,8 @@ char* FormatLink(char* url, char* link)
 		// Allocate for prefix, '/', link, and terminator.
 		result = malloc(prefixLength + 1 + strlen(link) + 1);
 		memcpy(result, url, prefixLength);
-		strcpy(result + prefixLength, link);
+		result[prefixLength] = '/';
+		strcpy(result + prefixLength + 1, link);
 	}
 	return result;
 }
@@ -115,6 +116,9 @@ char* GetLinksByTag(char* htmlcontent, char* url, char * tag_name, char * attrib
 	char* links = malloc(1);
 	size_t links_length = 0;
 	int i; // Loop iterator
+	char* base = malloc(strlen(url) + 1);
+
+	strcpy(base, url);
 
 	// Initialize the parser
 	HTMLSTREAMPARSER *hsp = html_parser_init( );
@@ -133,11 +137,17 @@ char* GetLinksByTag(char* htmlcontent, char* url, char * tag_name, char * attrib
 	// Loop over document
 	for (i = 0; i < document_size; i++) {
 		html_parser_char_parse(hsp, htmlcontent[i]);
+		// Detect different html base
+		if (html_parser_cmp_tag(hsp, "base", 4) && html_parser_cmp_attr(hsp, "href", 4) && html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
+			html_parser_val(hsp)[html_parser_val_length(hsp)] = '\0';
+			base = realloc(base, strlen(html_parser_val(hsp)) + 1);
+			strcpy(base, html_parser_val(hsp));
+		}
 		if (html_parser_cmp_tag(hsp, tag_name, tag_length)) {
 			if (html_parser_cmp_attr(hsp, attribute, attr_length)) {
 				if (html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
 					html_parser_val(hsp)[html_parser_val_length(hsp)] = '\0';
-					char* link = FormatLink(url, html_parser_val(hsp));
+					char* link = FormatLink(base, html_parser_val(hsp));
 					// Plus 1 byte for the newline
 					size_t link_length = strlen(link) + 1;
 					// Plus 1 byte for the null terminator
@@ -153,6 +163,7 @@ char* GetLinksByTag(char* htmlcontent, char* url, char * tag_name, char * attrib
 
 	/*release the hsp*/
 	html_parser_cleanup(hsp);
+	free(base);
 	return links;
 }
 
@@ -169,6 +180,10 @@ char* GetImageLinksFromWebPage(char* htmlcontent, char* url)
 int main(int argc, char* argv[]) {
 	if (argc != 2) {
 		printf("Usage: %s URL\n", argv[0]);
+		return 1;
+	}
+	if (strstr(argv[1], "://") == NULL) {
+		printf("URL does not contain protocol: %s", argv[1]);
 		return 1;
 	}
 	char* page = GetWebPage(argv[1]);
