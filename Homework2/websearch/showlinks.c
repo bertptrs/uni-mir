@@ -8,27 +8,26 @@ typedef struct {
 	size_t size;
 } MemoryStruct;
 
-size_t WriteToMemory(char* buffer, size_t size, size_t nmemb, MemoryStruct* memory) {
+size_t WriteToMemory(char* buffer, size_t size, size_t nmemb, MemoryStruct* memory)
+{
 	const size_t real_size = size * nmemb;
 
 	// Grow the buffer
 	memory->memory = (char*) realloc(memory->memory, memory->size + real_size + 1);
-	if (!memory->memory) {
-		// Out of memory
-		printf("Out of memory");
-		return 0;
-	}
+	// Append the data
 	memcpy(memory->memory + memory->size, buffer, real_size);
-
-	memory->size = memory->size + real_size;
+	memory->size += real_size;
+	// Set null terminator
 	memory->memory[memory->size] = '\0';
 
 	return real_size;
 }
 
+
 // Get a webpage as a string.
 // The resulting pointer needs to be freed.
-char * GetWebPage(const char* myurl) {
+char * GetWebPage(const char* myurl)
+{
 	CURL* curl = curl_easy_init();
 	MemoryStruct memory = { malloc(1), 0 };
 
@@ -53,13 +52,61 @@ char * GetWebPage(const char* myurl) {
 	}
 }
 
+char* GetLinksFromWebPage(char* htmlcontent, char* url)
+{
+	// Initialize the parser
+	HTMLSTREAMPARSER *hsp = html_parser_init( );
+	// Buffers for the stream parser.
+	char tag[8];
+	char attr[20];
+	char val[1024];
+	// Links string.
+	char* links = malloc(1);
+	size_t links_length = 0;
+	int i; // Loop iterator
+	html_parser_set_tag_to_lower(hsp, 1);
+	html_parser_set_attr_to_lower(hsp, 1);
+	html_parser_set_tag_buffer(hsp, tag, sizeof(tag));
+	html_parser_set_attr_buffer(hsp, attr, sizeof(attr));
+	html_parser_set_val_buffer(hsp, val, sizeof(val)-1);
+
+	links[0] = '\0';
+
+	const size_t document_size = strlen(htmlcontent);
+
+	// Loop over document
+	for (i = 0; i < document_size; i++) {
+		html_parser_char_parse(hsp, htmlcontent[i]);
+		if (html_parser_cmp_tag(hsp, "a", 1)) {
+			if (html_parser_cmp_attr(hsp, "href", 4)) {
+				if (html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
+					html_parser_val(hsp)[html_parser_val_length(hsp)] = '\0';
+					// Plus 1 byte for the newline
+					size_t link_length = strlen(html_parser_val(hsp)) + 1;
+					// Plus 1 byte for the null terminator
+					links = realloc(links, links_length + link_length + 1);
+					strcat(links, html_parser_val(hsp));
+					strcat(links, "\n");
+					links_length += link_length;
+				}
+			}
+		}
+	}
+
+	/*release the hsp*/
+	html_parser_cleanup(hsp);
+	return links;
+}
+
 int main(int argc, char* argv[]) {
 	if (argc != 2) {
 		printf("Usage: %s URL\n", argv[0]);
 		return 1;
 	}
 	char* page = GetWebPage(argv[1]);
-	puts(page);
+	char* links = GetLinksFromWebPage(page, argv[1]);
+	puts(links);
 	free(page);
+	free(links);
 	return 0;
 }
