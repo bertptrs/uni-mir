@@ -1,10 +1,7 @@
 BINARY=htmlprocess
 CFLAGS=-Wall -Wextra -pedantic -g
 
-all: htmlprocess showlinks
-
-htmlprocess: htmlprocess.c htmlstreamparser.o
-	cc $(CFLAGS) -o $@ $^ -lcurl
+all: showlinks
 
 showlinks: showlinks.c htmlstreamparser.o
 	cc $(CFLAGS) -o $@ $^ -lcurl
