@@ -8,6 +8,9 @@ typedef struct {
 	size_t size;
 } MemoryStruct;
 
+// CURL write callback that writes to memory.
+//
+// Based on: https://curl.haxx.se/libcurl/c/getinmemory.html
 size_t WriteToMemory(char* buffer, size_t size, size_t nmemb, MemoryStruct* memory)
 {
 	const size_t real_size = size * nmemb;
@@ -52,6 +55,56 @@ char * GetWebPage(const char* myurl)
 	}
 }
 
+// Create an absolute link from a relative one.
+//
+// This method returns a string pointer that must be freed.
+char* FormatLink(char* url, char* link)
+{
+	char* result;
+
+	if (strstr(link, "://")) {
+		// Link contains protocol. Assume full link.
+		result = malloc(strlen(link) + 1);
+		strcpy(result, link);
+		return result;
+	}
+
+	// Link is at least somewhat relative, compute domain.
+	char* domainBegin = strstr(url, "://") + 3;
+	char* domainEnd = strrchr(domainBegin, '/');
+	if (domainEnd == NULL) {
+		// Pure domain without trailing slash.
+		domainEnd = domainBegin + strlen(domainBegin);
+	} else {
+		// Skip the trailing slash.
+		domainEnd--;
+	}
+	size_t domainLength = domainEnd - url;
+
+
+	if (link[0] == '/') {
+		// Link is domain relative. Prepend protocol and domain
+		result = malloc(strlen(link) + domainLength + 1);
+		memcpy(result, url, domainLength);
+		strcpy(result + domainLength, link);
+	} else {
+		// Link is directory relative. Compute currect directory
+		char* dirEnd = strrchr(domainEnd, '/');
+		size_t prefixLength;
+		if (dirEnd != NULL) {
+			prefixLength = dirEnd - url - 1;
+		} else {
+			prefixLength = domainLength;
+		}
+
+		// Allocate for prefix, '/', link, and terminator.
+		result = malloc(prefixLength + 1 + strlen(link) + 1);
+		memcpy(result, url, prefixLength);
+		strcpy(result + prefixLength, link);
+	}
+	return result;
+}
+
 char* GetLinksByTag(char* htmlcontent, char* url, char * tag_name, char * attribute)
 {
 	// Buffers for the stream parser.
@@ -84,13 +137,15 @@ char* GetLinksByTag(char* htmlcontent, char* url, char * tag_name, char * attrib
 			if (html_parser_cmp_attr(hsp, attribute, attr_length)) {
 				if (html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
 					html_parser_val(hsp)[html_parser_val_length(hsp)] = '\0';
+					char* link = FormatLink(url, html_parser_val(hsp));
 					// Plus 1 byte for the newline
-					size_t link_length = strlen(html_parser_val(hsp)) + 1;
+					size_t link_length = strlen(link) + 1;
 					// Plus 1 byte for the null terminator
 					links = realloc(links, links_length + link_length + 1);
-					strcat(links, html_parser_val(hsp));
+					strcat(links, link);
 					strcat(links, "\n");
 					links_length += link_length;
+					free(link);
 				}
 			}
 		}
@@ -117,9 +172,15 @@ int main(int argc, char* argv[]) {
 		return 1;
 	}
 	char* page = GetWebPage(argv[1]);
+
 	char* links = GetLinksFromWebPage(page, argv[1]);
 	puts(links);
-	free(page);
 	free(links);
+
+	links = GetImageLinksFromWebPage(page, argv[1]);
+	puts(links);
+	free(links);
+
+	free(page);
 	return 0;
 }
