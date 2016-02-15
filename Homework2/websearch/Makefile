@@ -1,5 +1,5 @@
 BINARY=htmlprocess
-CFLAGS=-Wall -Wextra -pedantic -g
+CFLAGS=-Wall -Wextra -pedantic -g -std=c99
 
 all: showlinks
 

@@ -98,7 +98,7 @@ void html_parser_cleanup(HTMLSTREAMPARSER *hsp);
  * Returns 1 if the char specified by the chr argument
  * is the HTML whitespace otherwise returns 0.
  */
-inline int ishtmlspace(char chr);
+int ishtmlspace(char chr);
 
 /*
  * Strip HTML whitespace from the end of a string

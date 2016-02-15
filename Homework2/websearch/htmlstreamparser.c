@@ -17,6 +17,7 @@
  */
 
 #include <stdio.h>
+#include <ctype.h>
 #include "htmlstreamparser.h"
 //#include "cctype"
 
@@ -50,7 +51,7 @@ HTMLSTREAMPARSER *html_parser_init() { return html_parser_reset((HTMLSTREAMPARSE
 
 void html_parser_cleanup(HTMLSTREAMPARSER *hsp) { free(hsp); }
 
-inline int ishtmlspace(char chr) { return ((chr == ' ' || chr == '\t' || chr == '\n' || chr == '\r')); }
+int ishtmlspace(char chr) { return ((chr == ' ' || chr == '\t' || chr == '\n' || chr == '\r')); }
 
 char *html_parser_rtrim(char *src, size_t *len) { while (ishtmlspace(src[(*len)-1]) && *len > 0) { (*len)--; } return src; }
 
@@ -173,7 +174,7 @@ void html_parser_char_parse(HTMLSTREAMPARSER *hsp, const char c) {
 			else *s = 13;
 			break;
 	}
-	if (*s == 2 || *s == 13) if (*l >= 0 && *l < 6) if (script[*l] == tolower(c)) (*l)++; else *l = -1; else *l = -1;
+	if (*s == 2 || *s == 13) if (*l >= 0 && *l < 6) if (script[(int) *l] == tolower(c)) (*l)++; else *l = -1; else *l = -1;
 
 	if (h[HTML_INNER_TEXT]) {
 		if (h[HTML_INNER_TEXT_BEGINNING]) { hsp->inner_text_len = 0; hsp->inner_text_real_len = 0; }
