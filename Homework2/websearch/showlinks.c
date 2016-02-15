@@ -52,10 +52,8 @@ char * GetWebPage(const char* myurl)
 	}
 }
 
-char* GetLinksFromWebPage(char* htmlcontent, char* url)
+char* GetLinksByTag(char* htmlcontent, char* url, char * tag_name, char * attribute)
 {
-	// Initialize the parser
-	HTMLSTREAMPARSER *hsp = html_parser_init( );
 	// Buffers for the stream parser.
 	char tag[8];
 	char attr[20];
@@ -64,6 +62,9 @@ char* GetLinksFromWebPage(char* htmlcontent, char* url)
 	char* links = malloc(1);
 	size_t links_length = 0;
 	int i; // Loop iterator
+
+	// Initialize the parser
+	HTMLSTREAMPARSER *hsp = html_parser_init( );
 	html_parser_set_tag_to_lower(hsp, 1);
 	html_parser_set_attr_to_lower(hsp, 1);
 	html_parser_set_tag_buffer(hsp, tag, sizeof(tag));
@@ -73,12 +74,14 @@ char* GetLinksFromWebPage(char* htmlcontent, char* url)
 	links[0] = '\0';
 
 	const size_t document_size = strlen(htmlcontent);
+	const size_t tag_length = strlen(tag_name);
+	const size_t attr_length = strlen(attribute);
 
 	// Loop over document
 	for (i = 0; i < document_size; i++) {
 		html_parser_char_parse(hsp, htmlcontent[i]);
-		if (html_parser_cmp_tag(hsp, "a", 1)) {
-			if (html_parser_cmp_attr(hsp, "href", 4)) {
+		if (html_parser_cmp_tag(hsp, tag_name, tag_length)) {
+			if (html_parser_cmp_attr(hsp, attribute, attr_length)) {
 				if (html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
 					html_parser_val(hsp)[html_parser_val_length(hsp)] = '\0';
 					// Plus 1 byte for the newline
@@ -96,6 +99,16 @@ char* GetLinksFromWebPage(char* htmlcontent, char* url)
 	/*release the hsp*/
 	html_parser_cleanup(hsp);
 	return links;
+}
+
+char* GetLinksFromWebPage(char* htmlcontent, char* url)
+{
+	return GetLinksByTag(htmlcontent, url, "a", "href");
+}
+
+char* GetImageLinksFromWebPage(char* htmlcontent, char* url)
+{
+	return GetLinksByTag(htmlcontent, url, "img", "src");
 }
 
 int main(int argc, char* argv[]) {
