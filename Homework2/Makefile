@@ -3,16 +3,17 @@ IMAGERETRIEVALDIR=imageretrieval/Debug
 
 .PHONY: $(IMAGERETRIEVALDIR)/imageretrieval
 
-all: report.pdf \
-	ranklist.html
+all: Journal.pdf ranklist.html
+	$(MAKE) -C websearch
 
 clean:
 	$(RM) ranklist.html
-	$(RM) report.pdf
+	$(RM) Journal.pdf
 	$(MAKE) -C $(IMAGERETRIEVALDIR) clean
+	$(MAKE) -C websearch clean
 	latexmk -c
 
-report.pdf: report.tex
+Journal.pdf: Journal.tex
 	latexmk -xelatex $<
 
 ranklist.html: $(IMAGERETRIEVALDIR)/imageretrieval
