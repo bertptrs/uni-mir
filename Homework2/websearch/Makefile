@@ -1,9 +1,12 @@
 BINARY=htmlprocess
-LDFLAGS=-lcurl
+CFLAGS=-Wall -Wextra -pedantic
 
-all: htmlprocess
+all: htmlprocess showlinks
 
 htmlprocess: htmlprocess.c htmlstreamparser.o
+	cc -o $@ $^ -lcurl
+
+showlinks: showlinks.c htmlstreamparser.o
 	cc -o $@ $^ -lcurl
 
 clean:
