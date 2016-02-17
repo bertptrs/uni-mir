@@ -8,7 +8,7 @@
 #define MAXQSIZE 9000000       // Maximum size of the queue, q
 #define MAXURL 100000          // Maximum size of a URL
 #define MAXPAGESIZE 20000          // Maximum size of a webpage
-#define MAXDOWNLOADS 15      // Maximum number of downloads we will attempt
+#define MAXDOWNLOADS (1 << 20)      // Maximum number of downloads we will attempt
 
 int QSize(char *q)
 	//
@@ -39,16 +39,29 @@ void AppendLinks(char *p, char *q, char *weblinks)
 	//  to avoid segmentation faults.
 	//
 {
-	// Need
-	const size_t needed = strlen(weblinks) + 1;
-	const size_t available = MAXQSIZE - (p - q) - strlen(p);
-	if (available < needed) {
-		puts("Reached end of queue... exiting.");
-		free(q);
-		exit(0);
-	}
+	char* link = NULL;
+	char* qend = p + strlen(p);
+	char url[MAXURL];
+	while ((link = strsep(&weblinks, "\n")) != NULL) {
+		const size_t needed = strlen(link);
+		strcpy(url, link);
+		strcat(url, "\n");
+		if (strstr(q, url) != NULL) {
+			// Already in the queue,
+			// continue.
+			continue;
+		}
 
-	strcat(p, weblinks);
+		if (MAXQSIZE - (qend - q) < needed) {
+			puts("Reached end of queue... exiting.");
+			free(q);
+			exit(0);
+		}
+
+		strcpy(qend, link);
+		qend[needed] = '\n';
+		qend += needed + 1;
+	};
 }
 
 int GetNextURL(char *p, char *q, char *myurl)
@@ -57,23 +70,18 @@ int GetNextURL(char *p, char *q, char *myurl)
 	//  We also pass the queue so that we can check for the end of the queue
 	//
 {
-	int k;
-	for(k=0;k<MAXURL;k++)
-	{
-		if(p[k]=='\n')
-		{
-			myurl[k] = '\0';
-			return(1);
-		}
-		else {myurl[k] = p[k];}
+	char* endOfLink = strchr(p, '\n');
+	if (endOfLink == NULL) {
+		strcpy(myurl, "http://127.0.0.1/");
+		return 0;
+	} else {
+		const size_t length = endOfLink - p;
+		memcpy(myurl, p, length);
+		myurl[length] = '\0';
+		return 1;
 	}
-	//
-	// If no URL is found, then return localhost in myurl and a zero from the function
-	// This is to ensure that this function always returns an http URL
-	//
-	strcpy(myurl,"http://127.0.0.1");
-	return(0);
 }
+
 char *ShiftP(char *p, char *q)
 	//
 	//  This function returns the shifted position of p to the next URL
@@ -112,6 +120,7 @@ int main(int argc, char* argv[])
 	// where the end meets the beginning
 	//
 	q = ((char *) malloc(MAXQSIZE));  // When done, use free(q) to free the memory back to the OS
+	memset(q, 0, MAXQSIZE);
 	if (q==NULL) {printf("\n\nProblem with malloc...exiting\n\n"); exit(0);}
 	q[0]='\0';
 	p = q;
@@ -138,7 +147,7 @@ int main(int argc, char* argv[])
 		printf("\nDownload #: %d   Weblinks: %d   Queue Size: %d\n",k, qs, ql);
 
 		GetNextURL(p, q, url);
-		ShiftP(p, q);
+		p = ShiftP(p, q);
 		puts(url);
 
 
@@ -155,7 +164,7 @@ int main(int argc, char* argv[])
 
 			// You can adjust this error check depending on the rest of your code.  In this case
 			// the downloaded webpage was NULL - had no html nor links
-			if(html==NULL){printf("\n\nThe downloaded webpage was NULL\n\n");exit(0);}
+			if(html==NULL){printf("\n\nThe downloaded webpage was NULL\n\n");continue;}
 
 			//        v = strlen(html); printf("\n\nwebpage size of %s is %d\n\n",url,v);
 			if(html) {
