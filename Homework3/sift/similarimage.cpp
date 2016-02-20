@@ -27,6 +27,7 @@ int similarity(featureset a, featureset b)
 {
 	int similarPoints = 0;
 
+	// Mostly taken from test.cpp main code.
 	kd_node* kd_root = kdtree_build(b.features, b.nFeatures);
 	for (int i = 0; i < a.nFeatures; i++) {
 		feature* feat = a.features + i;
