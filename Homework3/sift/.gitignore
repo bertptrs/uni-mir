@@ -1,3 +1,5 @@
-notredame1.jpg.sift.jpg notredame2.jpg.sift.jpg
+*.sift.jpg
 getsift
+similarimage
 features*.txt
+matches*.jpg
