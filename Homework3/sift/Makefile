@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-Wall -Wextra -pedantic -g -std=c++11
+CXXFLAGS=-Wall -Wextra -pedantic -g -std=c++0x
 
 LIBRARIES=-ljpeg -lm
 
