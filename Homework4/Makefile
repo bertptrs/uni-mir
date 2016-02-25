@@ -3,12 +3,19 @@ CFLAGS=-Wall -Wextra -std=c99 -g -O2
 CXX=g++
 CXXFLAGS=-Wall -Wextra -std=c++11 -O2 -g
 
+DIRS=data/repository \
+	data/titleindex \
+	data/linkindex \
+	data/pageindex
+
 all: webspider
 
 clean:
 	$(RM) webspider
 	$(RM) *.o
 
-webspider: webspider.cpp htmlstreamparser.o Webclient.o Scraper.o LinkHelper.o Crawler.o
+webspider: webspider.cpp htmlstreamparser.o Webclient.o Scraper.o LinkHelper.o Crawler.o | $(DIRS)
 	$(CXX) -o $@ $(CXXFLAGS) $^ -lcurl -lssl
 
+$(DIRS):
+	mkdir -p $@

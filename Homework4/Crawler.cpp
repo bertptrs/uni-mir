@@ -1,5 +1,7 @@
 #include <iostream>
 #include <cstdio>
+#include <fstream>
+#include <cassert>
 #include "Crawler.hpp"
 #include "LinkHelper.hpp"
 #include "Webclient.hpp"
@@ -22,12 +24,19 @@ void Crawler::run()
 	while (!todo.empty()) {
 		TodoEntry entry = todo.front();
 		todo.pop();
+		if (visited.count(entry.second)) {
+			continue;
+		}
 		std::cout << "Request " << ++i << ": " << entry.second << std::endl;
 		std::cout << "Domains: " << domainVisits.size() << std::endl;
 		std::cout << "Queue size: " << todo.size() << std::endl << std::endl;
 
 		try {
-			scraper.load(entry.second);
+			std::string effective = scraper.load(entry.second);
+			visited.insert(effective);
+
+			saveData(effective);
+
 			for (auto url : scraper.getWeblinks()) {
 				queue(url);
 			}
@@ -39,12 +48,10 @@ void Crawler::run()
 
 void Crawler::queue(const std::string& url)
 {
-	if (queued.count(url)) {
+	if (visited.count(url)) {
 		// Already visited this one
 		return;
 	}
-
-	queued.insert(url);
 
 	TodoEntry entry = make_pair(domainVisits[LinkHelper::getDomain(url)]++, url);
 	todo.push(entry);
@@ -56,8 +63,18 @@ std::string Crawler::hash(const std::string& data)
 	std::string hexDigest(2 * MD5_DIGEST_LENGTH, ' ');
 	MD5((const unsigned char*) data.c_str(), data.size(), digest);
 	for (int i = 0; i < MD5_DIGEST_LENGTH; i++) {
-		sprintf(&hexDigest[2 * i], "%x", digest[i]);
+		sprintf(&hexDigest[2 * i], "%02x", digest[i]);
 	}
 
 	return hexDigest;
+}
+
+void Crawler::saveData(const std::string& url) const
+{
+	auto filename = "data/repository/" + hash(url);
+	std::ofstream output(filename, std::ios_base::out | std::ios_base::trunc);
+
+	assert(output.good() && "File should be writeable.");
+
+	output << scraper.getData();
 }

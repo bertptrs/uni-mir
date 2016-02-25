@@ -14,6 +14,8 @@ class Scraper
 		std::vector<std::string> getImagelinks() const;
 		std::vector<std::string> getWords();
 
+		const std::string& getData() const;
+
 	private:
 		Webclient client;
 		std::string url;

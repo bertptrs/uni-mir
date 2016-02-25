@@ -20,11 +20,12 @@ class Crawler
 		Scraper scraper;
 
 		std::unordered_map<std::string, unsigned int> domainVisits;
-		std::unordered_set<std::string> queued;
+		std::unordered_set<std::string> visited;
 		std::queue<TodoEntry> todo;
 
 		void run();
 		void queue(const std::string& url);
+		void saveData(const std::string& url) const;
 
 		static std::string hash(const std::string& data);
 };

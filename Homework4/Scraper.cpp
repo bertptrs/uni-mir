@@ -65,3 +65,8 @@ std::vector<std::string> Scraper::getLinksByTagName(const char* tag_name, const 
 	html_parser_cleanup(hsp);
 	return links;
 }
+
+const std::string& Scraper::getData() const
+{
+	return data;
+}
