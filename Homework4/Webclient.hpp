@@ -11,7 +11,8 @@ class Webclient
 		Webclient();
 		~Webclient();
 
-		std::string getURL(const std::string& url);
+		// Request the given URL. The url is modified to reflect the actual URL.
+		std::string getURL(std::string& url);
 
 		struct CrawlException {};
 

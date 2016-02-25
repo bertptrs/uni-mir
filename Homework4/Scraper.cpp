@@ -2,10 +2,12 @@
 #include "LinkHelper.hpp"
 #include "htmlstreamparser.h"
 
-void Scraper::load(const std::string& newURL)
+std::string Scraper::load(const std::string& newURL)
 {
-	data = client.getURL(newURL);
 	url = newURL;
+	data = client.getURL(url);
+
+	return url;
 }
 
 std::vector<std::string> Scraper::getWeblinks() const

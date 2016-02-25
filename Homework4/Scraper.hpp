@@ -9,7 +9,7 @@
 class Scraper
 {
 	public:
-		void load(const std::string& url);
+		std::string load(const std::string& url);
 		std::vector<std::string> getWeblinks() const;
 		std::vector<std::string> getImagelinks() const;
 		std::vector<std::string> getWords();

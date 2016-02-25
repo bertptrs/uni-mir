@@ -19,7 +19,7 @@ Webclient::~Webclient()
 	curl_easy_cleanup(curl);
 }
 
-std::string Webclient::getURL(const std::string& url)
+std::string Webclient::getURL(std::string& url)
 {
 	// Set the link
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -33,6 +33,10 @@ std::string Webclient::getURL(const std::string& url)
 		CrawlException ex;
 		throw ex;
 	}
+
+	char* effectiveURL;
+	curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effectiveURL);
+	url = effectiveURL;
 
 	return buffer.str();
 }
