@@ -29,6 +29,7 @@ class Crawler
 		void run();
 		void queue(const std::string& url);
 		void saveData(const std::string& url) const;
+		void saveLinkToURL(const std::string& url, const std::string& refererer) const;
 		bool recentlyVisitedDomain(const std::string& url) const;
 
 		static std::string hash(const std::string& data);
