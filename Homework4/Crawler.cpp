@@ -22,17 +22,22 @@ void Crawler::run()
 {
 	int i = 0;
 	while (!todo.empty()) {
-		TodoEntry entry = todo.front();
+		std::string entry = todo.front();
 		todo.pop();
-		if (visited.count(entry.second)) {
+		if (visited.count(entry)) {
 			continue;
 		}
-		std::cout << "Request " << ++i << ": " << entry.second << std::endl;
+		if (recentlyVisitedDomain(entry)) {
+			queue(entry);
+			continue;
+		}
+		std::cout << "Request " << ++i << ": " << entry << std::endl;
 		std::cout << "Domains: " << domainVisits.size() << std::endl;
 		std::cout << "Queue size: " << todo.size() << std::endl << std::endl;
 
 		try {
-			std::string effective = scraper.load(entry.second);
+			domainVisits[LinkHelper::getDomain(entry)] = Clock::now();
+			std::string effective = scraper.load(entry);
 			visited.insert(effective);
 
 			saveData(effective);
@@ -41,7 +46,7 @@ void Crawler::run()
 				queue(url);
 			}
 		} catch (Webclient::CrawlException ex) {
-			std::cerr << "Failed to load url " << entry.second << std::endl;
+			std::cerr << "Failed to load url " << entry << std::endl;
 		}
 	}
 }
@@ -53,8 +58,7 @@ void Crawler::queue(const std::string& url)
 		return;
 	}
 
-	TodoEntry entry = make_pair(domainVisits[LinkHelper::getDomain(url)]++, url);
-	todo.push(entry);
+	todo.push(url);
 }
 
 std::string Crawler::hash(const std::string& data)
@@ -77,4 +81,13 @@ void Crawler::saveData(const std::string& url) const
 	assert(output.good() && "File should be writeable.");
 
 	output << scraper.getData();
+}
+
+bool Crawler::recentlyVisitedDomain(const std::string& url) const
+{
+	try {
+		return Clock::now() - domainVisits.at(LinkHelper::getDomain(url)) < DOMAIN_REQUEST_INTERVAL;
+	} catch (std::out_of_range) {
+		return false;
+	}
 }
