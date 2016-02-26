@@ -3,7 +3,7 @@
 
 #include <string>
 #include <vector>
-#include <set>
+#include <unordered_set>
 #include "Webclient.hpp"
 
 class Scraper
@@ -12,7 +12,8 @@ class Scraper
 		std::string load(const std::string& url);
 		std::vector<std::string> getWeblinks() const;
 		std::vector<std::string> getImagelinks() const;
-		std::vector<std::string> getWords();
+		std::unordered_set<std::string> getWords() const;
+		std::unordered_set<std::string> getTitleWords() const;
 
 		const std::string& getData() const;
 
@@ -22,6 +23,7 @@ class Scraper
 		std::string data;
 
 		std::vector<std::string> getLinksByTagName(const char* tag_name, const char* attribute) const;
+		std::unordered_set<std::string> getWordsFromTag(const std::string& tag_name) const;
 };
 
 #endif

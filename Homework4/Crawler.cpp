@@ -47,6 +47,8 @@ void Crawler::run()
 			string effective = scraper.load(entry);
 			visited.insert(effective);
 
+			saveWordIndex(effective, "pageindex", scraper.getWords());
+			saveWordIndex(effective, "titleindex", scraper.getTitleWords());
 			saveData(effective);
 
 			for (auto url : scraper.getWeblinks()) {
@@ -99,6 +101,18 @@ void Crawler::saveLinkToURL(const string& url, const string& referer) const
 	assert(output.good() && "File should be writable.");
 
 	output << referer << endl;
+}
+
+void Crawler::saveWordIndex(const string& url, const string& directory, const unordered_set<string>& words) const
+{
+	const auto prefix = "data/" + directory + "/";
+	for (const auto& word : words) {
+		ofstream output(prefix + hash(word), ios_base::out | ios_base::app);
+
+		assert(output.good() && "File should be writable.");
+
+		output << url << endl;
+	}
 }
 
 bool Crawler::recentlyVisitedDomain(const string& url) const
