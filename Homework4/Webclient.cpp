@@ -10,7 +10,7 @@ Webclient::Webclient() :
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2);
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
 	curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "gzip");
-	curl_easy_setopt(curl, CURLOPT_USERAGENT, "GoogleLiteBot");
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "MIRBot/1.0 - A robot made for a course at Leiden University - Abuse: l.j.peters@umail.leidenuniv.nl");
 }
 
 Webclient::~Webclient()
@@ -28,11 +28,15 @@ std::string Webclient::getURL(std::string& url)
 	buffer.str("");
 
 	CURLcode res = curl_easy_perform(curl);
+	long http_code;
 
-	if (res != 0) {
+	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
+
+	if (res != 0 || http_code != 200) {
 		CrawlException ex;
 		throw ex;
 	}
+
 
 	char* effectiveURL;
 	curl_easy_getinfo(curl, CURLINFO_EFFECTIVE_URL, &effectiveURL);
