@@ -16,7 +16,7 @@ clean:
 	$(RM) -r $(DIRS)
 
 webspider: webspider.cpp htmlstreamparser.o Webclient.o Scraper.o LinkHelper.o Crawler.o RobotsHandler.o | $(DIRS)
-	$(CXX) -o $@ $(CXXFLAGS) $^ -lcurl -lssl
+	$(CXX) -o $@ $(CXXFLAGS) $^ -lcurl -lssl -lcrypto
 
 $(DIRS):
 	mkdir -p $@
