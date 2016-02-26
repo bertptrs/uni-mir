@@ -33,6 +33,11 @@ void Crawler::run()
 			queue(entry);
 			continue;
 		}
+		if (!robotsHandler.isAllowed(entry)) {
+			cerr << "Skipping " << entry << " due to robots.txt" << endl;
+			visited.insert(entry);
+			continue;
+		}
 		cout << "Request " << ++i << ": " << entry << endl;
 		cout << "Domains: " << domainVisits.size() << endl;
 		cout << "Queue size: " << todo.size() << endl << endl;

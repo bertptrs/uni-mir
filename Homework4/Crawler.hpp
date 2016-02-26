@@ -9,6 +9,7 @@
 #include <queue>
 #include <chrono>
 #include "Scraper.hpp"
+#include "RobotsHandler.hpp"
 
 class Crawler
 {
@@ -21,6 +22,7 @@ class Crawler
 		static constexpr auto DOMAIN_REQUEST_INTERVAL = std::chrono::seconds(2);
 
 		Scraper scraper;
+		RobotsHandler robotsHandler;
 
 		std::unordered_map<std::string, Clock::time_point> domainVisits;
 		std::unordered_set<std::string> visited;
