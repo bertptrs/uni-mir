@@ -5,7 +5,6 @@
 #include "Crawler.hpp"
 #include "LinkHelper.hpp"
 #include "Webclient.hpp"
-#include "openssl/md5.h"
 
 using namespace std;
 
@@ -48,15 +47,15 @@ void Crawler::run()
 			visited.insert(effective);
 
 			// update all indexes
-			saveWordIndex(effective, "pageindex", scraper.getWords());
-			saveWordIndex(effective, "titleindex", scraper.getTitleWords());
-			saveWordIndex(effective, "webindex", LinkHelper::getURLWords(effective));
-			saveData(effective);
+			indexHelper.saveWordIndex(effective, "pageindex", scraper.getWords());
+			indexHelper.saveWordIndex(effective, "titleindex", scraper.getTitleWords());
+			indexHelper.saveWordIndex(effective, "webindex", LinkHelper::getURLWords(effective));
+			indexHelper.savePageData(effective, scraper.getData());
 
 			// Queue all links in the page.
 			for (auto url : scraper.getWeblinks()) {
 				queue(url);
-				saveLinkToURL(url, entry);
+				indexHelper.saveLinkToURL(url, entry);
 			}
 		} catch (Webclient::CrawlException ex) {
 			cerr << "Failed to load url " << entry << endl;
@@ -72,50 +71,6 @@ void Crawler::queue(const string& url)
 	}
 
 	todo.push(url);
-}
-
-string Crawler::hash(const string& data)
-{
-	unsigned char digest[MD5_DIGEST_LENGTH + 1];
-	string hexDigest(2 * MD5_DIGEST_LENGTH, ' ');
-	MD5((const unsigned char*) data.c_str(), data.size(), digest);
-	for (int i = 0; i < MD5_DIGEST_LENGTH; i++) {
-		sprintf(&hexDigest[2 * i], "%02x", digest[i]);
-	}
-
-	return hexDigest;
-}
-
-void Crawler::saveData(const string& url) const
-{
-	auto filename = "data/repository/" + hash(url);
-	ofstream output(filename, ios_base::out | ios_base::trunc);
-
-	assert(output.good() && "File should be writeable.");
-
-	output << scraper.getData();
-}
-
-void Crawler::saveLinkToURL(const string& url, const string& referer) const
-{
-	auto filename = "data/linkindex/" + hash(url);
-	ofstream output(filename, ios_base::out | ios_base::app);
-
-	assert(output.good() && "File should be writable.");
-
-	output << referer << endl;
-}
-
-void Crawler::saveWordIndex(const string& url, const string& directory, const unordered_set<string>& words) const
-{
-	const auto prefix = "data/" + directory + "/";
-	for (const auto& word : words) {
-		ofstream output(prefix + hash(word), ios_base::out | ios_base::app);
-
-		assert(output.good() && "File should be writable.");
-
-		output << url << endl;
-	}
 }
 
 bool Crawler::recentlyVisitedDomain(const string& url) const

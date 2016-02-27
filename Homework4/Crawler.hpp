@@ -10,6 +10,7 @@
 #include <chrono>
 #include "Scraper.hpp"
 #include "RobotsHandler.hpp"
+#include "IndexHelper.hpp"
 
 class Crawler
 {
@@ -23,6 +24,7 @@ class Crawler
 
 		Scraper scraper;
 		RobotsHandler robotsHandler;
+		IndexHelper indexHelper;
 
 		std::unordered_map<std::string, Clock::time_point> domainVisits;
 		std::unordered_set<std::string> visited;
@@ -30,13 +32,8 @@ class Crawler
 
 		void run();
 		void queue(const std::string& url);
-		void saveData(const std::string& url) const;
-		void saveLinkToURL(const std::string& url, const std::string& refererer) const;
-		void saveWordIndex(const std::string& url, const std::string& directory, const std::unordered_set<std::string>& words) const;
 
 		bool recentlyVisitedDomain(const std::string& url) const;
-
-		static std::string hash(const std::string& data);
 };
 
 #endif
