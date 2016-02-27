@@ -47,10 +47,13 @@ void Crawler::run()
 			string effective = scraper.load(entry);
 			visited.insert(effective);
 
+			// update all indexes
 			saveWordIndex(effective, "pageindex", scraper.getWords());
 			saveWordIndex(effective, "titleindex", scraper.getTitleWords());
+			saveWordIndex(effective, "webindex", LinkHelper::getURLWords(effective));
 			saveData(effective);
 
+			// Queue all links in the page.
 			for (auto url : scraper.getWeblinks()) {
 				queue(url);
 				saveLinkToURL(url, entry);

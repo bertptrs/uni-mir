@@ -1,22 +1,25 @@
 #include "LinkHelper.hpp"
-#include <iostream>
+#include <cctype>
+#include <sstream>
 
-std::string LinkHelper::getProtocol(const std::string& url)
+using namespace std;
+
+string LinkHelper::getProtocol(const string& url)
 {
 	size_t pos = url.find("://");
-	if (pos == std::string::npos) {
+	if (pos == string::npos) {
 		return "";
 	} else {
 		return url.substr(0, pos) + "://";
 	}
 }
 
-std::string LinkHelper::getDomain(const std::string& url)
+string LinkHelper::getDomain(const string& url)
 {
 	const auto protocol = getProtocol(url);
 	size_t endSlash = url.find('/', protocol.size());
 
-	if (endSlash == std::string::npos) {
+	if (endSlash == string::npos) {
 		// No terminating slash, return entire string minus protocol.
 		return url.substr(protocol.size());
 	} else {
@@ -24,21 +27,21 @@ std::string LinkHelper::getDomain(const std::string& url)
 	}
 }
 
-std::string LinkHelper::getDirectory(const std::string& url)
+string LinkHelper::getDirectory(const string& url)
 {
 	const auto protocol = getProtocol(url);
 	size_t pos = url.rfind('/');
-	if (pos == std::string::npos || pos < protocol.size()) {
+	if (pos == string::npos || pos < protocol.size()) {
 		return url + "/";
 	}
 
 	return url.substr(0, pos + 1);
 }
 
-std::string LinkHelper::relativize(const std::string& url, const std::string& base)
+string LinkHelper::relativize(const string& url, const string& base)
 {
 	size_t pos;
-	if ((pos = url.find('#')) != std::string::npos) {
+	if ((pos = url.find('#')) != string::npos) {
 		// Strip the anchor and try again.
 		return relativize(url.substr(0, pos), base);
 	}
@@ -71,4 +74,27 @@ std::string LinkHelper::relativize(const std::string& url, const std::string& ba
 
 	// Document relative URL
 	return getDirectory(base) + url;
+}
+
+unordered_set<string> LinkHelper::getURLWords(const string& url)
+{
+	unordered_set<string> words;
+	string word;
+	stringstream currentWord;
+	for (char c : url)
+	{
+		if (isalnum(c)) {
+			currentWord << tolower(c);
+		} else {
+			currentWord >> word;
+			words.insert(word);
+		}
+	}
+
+	currentWord >> word;
+	if (!word.empty()) {
+		words.insert(word);
+	}
+
+	return words;
 }

@@ -6,6 +6,7 @@ CXXFLAGS=-Wall -Wextra -std=c++11 -O2 -g
 DIRS=data/repository \
 	data/titleindex \
 	data/linkindex \
+	data/webindex \
 	data/pageindex
 
 all: webspider
