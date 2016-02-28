@@ -5,6 +5,21 @@
 
 using namespace std;
 
+set<string> IndexHelper::getLinksFromIndex(const string& word, const string& index) const
+{
+	set<string> links;
+	string current;
+	ifstream input("data/" + index + "/" + hash(word));
+
+	while (getline(input, current)) {
+		if (!current.empty()) {
+			links.insert(current);
+		}
+	}
+
+	return links;
+}
+
 string IndexHelper::hash(const string& data)
 {
 	unsigned char digest[MD5_DIGEST_LENGTH + 1];
