@@ -33,7 +33,7 @@ function getSnippet($filename) {
 <body>
 
 <form>
-    <h1>MIRgle</h1>
+    <h1><span style="color:#4285f4;">M</span><span style="color:#ea4335;">I</span><span style="color:#ffbc05">R</span><span style="color:#4285f4;">g</span><span style="color:#34a853;">l</span><span style="color:#ffbc05">e</span></h1>
     <input type="search" name="q" value="<?= isset($_GET['q']) ? htmlentities($_GET['q']) : "" ?>">
     <button type="submit">
         Search
