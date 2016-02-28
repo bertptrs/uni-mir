@@ -74,7 +74,7 @@ vector<string> getResults(string query)
 
 int main()
 {
-	string query = "liacs";
+	string query = getQueryString();
 	for (auto result : getResults(query)) {
 		cout << result << endl;
 	}
