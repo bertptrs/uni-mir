@@ -9,6 +9,8 @@ class IndexHelper
 {
 	public:
 		std::set<std::string> getLinksFromIndex(const std::string& word, const std::string& index) const;
+		int getLinksToURL(const std::string& url) const;
+		bool hasCrawledURL(const std::string& url) const;
 
 		void saveLinkToURL(const std::string& url, const std::string& refererer) const;
 		void saveWordIndex(const std::string& url, const std::string& directory, const std::unordered_set<std::string>& words) const;

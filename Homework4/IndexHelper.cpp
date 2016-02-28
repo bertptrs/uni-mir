@@ -1,5 +1,9 @@
 #include <fstream>
 #include <cassert>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <algorithm>
 #include "IndexHelper.hpp"
 #include "openssl/md5.h"
 
@@ -18,6 +22,23 @@ set<string> IndexHelper::getLinksFromIndex(const string& word, const string& ind
 	}
 
 	return links;
+}
+
+int IndexHelper::getLinksToURL(const string& url) const
+{
+	auto filename = "data/linkindex/" + hash(url);
+	ifstream input(filename);
+
+	return count(istreambuf_iterator<char>(input),
+			istreambuf_iterator<char>(), '\n');
+}
+
+bool IndexHelper::hasCrawledURL(const string& url) const
+{
+	struct stat buffer;
+	auto filename = "data/repository/" + hash(url);
+
+	return stat(filename.c_str(), &buffer) == 0;
 }
 
 string IndexHelper::hash(const string& data)

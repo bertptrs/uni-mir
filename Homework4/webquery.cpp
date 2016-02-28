@@ -37,7 +37,19 @@ map<string, int> getWeightedResults(const string& query)
 		}
 	}
 
-	// TODO: Add the link score
+	for (auto& entry : results) {
+		entry.second += helper.getLinksToURL(entry.first);
+	}
+
+	// Filter out links that have not been crawled yet.
+	for (auto it = results.begin(); it != results.end(); ) {
+		if (!helper.hasCrawledURL(it->first)) {
+			cout << "Erased " << it->first << endl;
+			results.erase(it++);
+		} else {
+			++it;
+		}
+	}
 
 	return results;
 }
