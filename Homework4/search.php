@@ -15,14 +15,14 @@ function getTitle($filename) {
 function getSnippet($filename) {
     $document = new DOMDocument();
     @$document->loadHTMLFile($filename);
-    $bodys = $document->getElementsByTagName("body");
-    if ($bodys->length == 0) {
-        return "";
-    } else {
-        $content = $bodys->item(0)->textContent;
-
-        return preg_replace('/\s+/', ' ', $content);
-    }
+    $bodys = $document->getElementsByTagName("p");
+        for ($i = 0; $i < $bodys->length; $i++) {
+            $content = trim(str_replace("&nbsp;", " ", $bodys->item($i)->textContent), " \t\n\r\0\x0B\xA0\xC2");
+            if (strlen($content) > 0) {
+                return preg_replace('/\s+/', ' ', $content);
+            }
+        }
+    return "";
 }
 ?>
 <!DOCTYPE HTML>
