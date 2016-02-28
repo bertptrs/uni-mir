@@ -6,7 +6,7 @@ function getTitle($filename) {
     $titles = $document->getElementsByTagName("title");
 
     if ($titles->length == 0) {
-        return $filename;
+        return false;
     } else {
         return $titles->item(0)->textContent;
     }
@@ -45,12 +45,15 @@ if (isset($_GET['q'])) {
     file_put_contents("query.txt", $_GET['q']);
     $results = explode("\n", `./webquery`);
     foreach ($results as $url) {
+        if (strlen($url) == 0) {
+            continue;
+        }
         $filename = "data/repository/" . md5($url);
         $title = getTitle($filename);
         $snippet = getSnippet($filename);
 ?>
 <div class="result">
-    <h2><a href="<?= htmlentities($url) ?>"><?= $title ?></a></h2>
+    <h2><a href="<?= htmlentities($url) ?>"><?= $title ? $title : "No title" ?></a></h2>
     <div class="url"><?= htmlentities($url) ?></div>
     <p><?= htmlentities($snippet) ?></p>
 </div>
