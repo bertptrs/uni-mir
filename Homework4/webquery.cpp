@@ -39,15 +39,12 @@ map<string, int> getWeightedResults(const string& query)
 		}
 	}
 
-	for (auto& entry : results) {
-		entry.second += helper.getLinksToURL(entry.first);
-	}
-
 	return results;
 }
 
 vector<string> getResults(const string& query)
 {
+	IndexHelper helper;
 	stringstream tokens(query);
 	queue<map<string, int>> totalResults;
 	string token;
@@ -84,6 +81,10 @@ vector<string> getResults(const string& query)
 			}
 		}
 		weightedResults.erase(currentIt, weightedResults.end());
+	}
+
+	for (auto& entry : weightedResults) {
+		entry.second += helper.getLinksToURL(entry.first);
 	}
 
 	vector<pair<int, string>> orderedResults;
