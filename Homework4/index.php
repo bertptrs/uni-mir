@@ -1,3 +1,4 @@
+#!/usr/bin/php5-cgi
 <?php
 
 function getTitle($filename) {
