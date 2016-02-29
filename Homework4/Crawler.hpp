@@ -27,7 +27,7 @@ class Crawler
 		IndexHelper indexHelper;
 
 		std::unordered_map<std::string, Clock::time_point> domainVisits;
-		std::unordered_set<std::string> visited;
+		std::unordered_set<std::string> queued;
 		std::queue<std::string> todo;
 
 		void run();

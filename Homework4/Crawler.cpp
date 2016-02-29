@@ -25,7 +25,9 @@ void Crawler::run()
 	while (!todo.empty()) {
 		string entry = todo.front();
 		todo.pop();
-		if (visited.count(entry)) {
+		queued.erase(entry);
+
+		if (indexHelper.hasCrawledURL(entry)) {
 			continue;
 		}
 		if (recentlyVisitedDomain(entry)) {
@@ -34,7 +36,6 @@ void Crawler::run()
 		}
 		if (!robotsHandler.isAllowed(entry)) {
 			cerr << "Skipping " << entry << " due to robots.txt" << endl;
-			visited.insert(entry);
 			continue;
 		}
 		cout << "Request " << ++i << ": " << entry << endl;
@@ -44,7 +45,6 @@ void Crawler::run()
 		try {
 			domainVisits[LinkHelper::getDomain(entry)] = Clock::now();
 			string effective = scraper.load(entry);
-			visited.insert(effective);
 
 			// update all indexes
 			indexHelper.saveWordIndex(effective, "pageindex", scraper.getWords());
@@ -65,10 +65,12 @@ void Crawler::run()
 
 void Crawler::queue(const string& url)
 {
-	if (visited.count(url)) {
+	if (queued.count(url) || indexHelper.hasCrawledURL(url)) {
 		// Already visited this one
 		return;
 	}
+
+	queued.insert(url);
 
 	todo.push(url);
 }

@@ -13,25 +13,25 @@ string Scraper::load(const string& newURL)
 	return url;
 }
 
-vector<string> Scraper::getWeblinks() const
+unordered_set<string> Scraper::getWeblinks() const
 {
 	return getLinksByTagName("a", "href");
 }
 
 
-vector<string> Scraper::getImagelinks() const
+unordered_set<string> Scraper::getImagelinks() const
 {
 	return getLinksByTagName("img", "src");
 }
 
-vector<string> Scraper::getLinksByTagName(const char* tag_name, const char* attribute) const
+unordered_set<string> Scraper::getLinksByTagName(const char* tag_name, const char* attribute) const
 {
 	// Buffers for the stream parser.
 	char tag[8];
 	char attr[20];
 	char val[1024];
 	// Links string.
-	vector<string> links;
+	unordered_set<string> links;
 	string base = url;
 
 	// Initialize the parser
@@ -58,7 +58,7 @@ vector<string> Scraper::getLinksByTagName(const char* tag_name, const char* attr
 				if (html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
 					html_parser_val(hsp)[html_parser_val_length(hsp)] = '\0';
 					string link = LinkHelper::relativize(html_parser_val(hsp), base);
-					links.push_back(link);
+					links.insert(link);
 				}
 			}
 		}
