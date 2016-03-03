@@ -34,6 +34,13 @@ I chose to do the medium difficulty exercise. To prepare, I recoded my current c
 	\item The crawler can be stopped and started again, without causing duplicate entries in the index
 	\item The crawler better respects redirects, and actually notices them
 \end{itemize}
+The crawler is entirely written by myself, except for the following external libraries:
+\begin{itemize}
+	\item cURL
+	\item OpenSSL (for MD5 hashing)
+	\item htmlstreamparser (included and slightly modified)\footnote{This is mostly limited to using \texttt{const char*} instead of \texttt{char*} in method signatures. This allowed for greater interoperability between \texttt{std::string} and the library.}
+\end{itemize}
+The inclusion of OpenSSL does not pose an additional dependency on the host system, as it was required for cURL anyway.
 
 \subsection{Building the programs}
 
@@ -85,12 +92,18 @@ After this, the results are sorted by relevance (descendingly) and printed to th
 
 \subsection{Using the web interface}
 
-The web interface is located in \texttt{index.php}. It needs a simple webserver to host it. I used the PHP builtin webserver, available from PHP 5.4 onward, but on university computers the mongoose server suffices.\footnote{The mongoose server is not included in the report due to licensing issues, but can be downloaded freely at \url{https://www.cesanta.com/products\#binary}}
+The web interface is located in \texttt{index.php}. It needs a simple webserver to host it. I used the PHP builtin webserver, available from PHP 5.4 onward, but on university computers the mongoose server suffices.\footnote{The mongoose server is not included in the report due to licensing issues, but can be downloaded for free at \url{https://www.cesanta.com/products\#binary}}.\footnote{If possible, I recommend using the PHP builtin webserver, as Mongoose appears to have some issues with non-ascii characters.}
 
 It takes a query from the URL (or the form) and writes it to \texttt{query.txt}, and then calls the \texttt{webquery} program.
 
 To present a nice result to the user, I parse the original document as HTML, and show the user the first non-empty paragraph. This usually presents a nice snippet.
 
-As a final touch, I named my search engine MIRgle, and copied the Google logo colours to my own.
+As a final touch, I named my search engine MIRgle, and copied the Google logo colours to my own. The final result can be seen in \autoref{fig:mirgle}.
+
+\begin{figure}
+\includegraphics[width=\textwidth]{screenshot}
+\caption{The results page of MIRgle}
+\label{fig:mirgle}
+\end{figure}
 
 \end{document}
