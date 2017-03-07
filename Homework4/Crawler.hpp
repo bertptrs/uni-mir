@@ -15,6 +15,8 @@
 class Crawler
 {
 	public:
+		Crawler();
+
 		void startCrawl(const std::string& startingPoint);
 
 	private:
@@ -29,6 +31,9 @@ class Crawler
 		std::unordered_map<std::string, Clock::time_point> domainVisits;
 		std::unordered_set<std::string> queued;
 		std::queue<std::string> todo;
+
+		static void registerHandler();
+		static void handler(int);
 
 		void run();
 		void queue(const std::string& url);

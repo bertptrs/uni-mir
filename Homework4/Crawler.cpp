@@ -2,11 +2,34 @@
 #include <cstdio>
 #include <fstream>
 #include <cassert>
+#include <csignal>
 #include "Crawler.hpp"
 #include "LinkHelper.hpp"
 #include "Webclient.hpp"
 
 using namespace std;
+
+static bool interrupted = false;
+static bool registered = false;
+
+Crawler::Crawler()
+{
+	registerHandler();
+}
+
+void Crawler::registerHandler()
+{
+	if (!registered) {
+		registered = true;
+		signal(SIGINT, handler);
+	}
+}
+
+void Crawler::handler(int)
+{
+	cerr << "Received interrupt!" << endl;
+	interrupted = true;
+}
 
 void Crawler::startCrawl(const string& startingPoint)
 {
@@ -15,6 +38,7 @@ void Crawler::startCrawl(const string& startingPoint)
 		cerr << "Cannot start at " << url << endl;
 		return;
 	}
+
 	queue(url);
 	run();
 }
@@ -22,7 +46,7 @@ void Crawler::startCrawl(const string& startingPoint)
 void Crawler::run()
 {
 	int i = 0;
-	while (!todo.empty()) {
+	while (!todo.empty() && !interrupted) {
 		string entry = todo.front();
 		todo.pop();
 		queued.erase(entry);
@@ -43,8 +67,8 @@ void Crawler::run()
 		cout << "Queue size: " << todo.size() << endl << endl;
 
 		try {
-			domainVisits[LinkHelper::getDomain(entry)] = Clock::now();
 			string effective = scraper.load(entry);
+			domainVisits[LinkHelper::getDomain(entry)] = Clock::now();
 
 			// update all indexes
 			indexHelper.saveWordIndex(effective, "pageindex", scraper.getWords());
