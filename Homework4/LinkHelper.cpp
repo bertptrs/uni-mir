@@ -79,21 +79,17 @@ string LinkHelper::relativize(const string& url, const string& base)
 unordered_set<string> LinkHelper::getURLWords(const string& url)
 {
 	unordered_set<string> words;
-	string word;
-	stringstream currentWord;
+	stringstream wordBuffer;
 	for (char c : url)
 	{
-		if (isalnum(c)) {
-			currentWord << tolower(c);
-		} else {
-			currentWord >> word;
-			words.insert(word);
-		}
+		wordBuffer << (char) (isalnum(c) ? tolower(c) : ' ');
 	}
 
-	currentWord >> word;
-	if (!word.empty()) {
-		words.insert(word);
+	string word;
+	while (wordBuffer >> word) {
+		if (word != "http" && word != "https" && word != "www") {
+			words.insert(word);
+		}
 	}
 
 	return words;
