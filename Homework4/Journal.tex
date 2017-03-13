@@ -54,6 +54,8 @@ without the line break in the second line. This will instruct your shell to use 
 
 After doing so, the program can be built with \texttt{make} and run normally. Please note that the updated library export is needed for running the program, not just compiling. The webcrawler can be used with \texttt{./webspider [URL]}, where \texttt{[URL]} is a valid url including protocol. It will then do a modified breadth first search starting at that URL, skipping any pages already in the index.
 
+Note that \texttt{make} creates all necessary directories for the indices. If you run the program in a different folder, make sure those directories exist.
+
 \subsection{Being a nice bot}
 
 For this exercise, I wanted my bot to crawl the entire internet, not just our local websites. To do this, I had to be nicer to sites than I have been until now.
@@ -92,18 +94,31 @@ After this, the results are sorted by relevance (descendingly) and printed to th
 
 \subsection{Using the web interface}
 
-The web interface is located in \texttt{index.php}. It needs a simple webserver to host it. I used the PHP builtin webserver, available from PHP 5.4 onward, but on university computers the mongoose server suffices.\footnote{The mongoose server is not included in the report due to licensing issues, but can be downloaded for free at \url{https://www.cesanta.com/products\#binary}}.\footnote{If possible, I recommend using the PHP builtin webserver, as Mongoose appears to have some issues with non-ascii characters.}
+The web interface is located in \texttt{index.php}. It needs a simple webserver to host it. I used the PHP builtin webserver, available from PHP 5.4 onward, but on university computers the mongoose server suffices.\footnote{The mongoose server is not included in the report due to licensing issues, but can be downloaded for free at \url{https://www.cesanta.com/products\#binary}}.\footnote{If possible, I recommend using the PHP builtin webserver, as Mongoose appears to have some issues with non-ascii characters.} Note that for Mongoose to properly work, a shebang (\texttt{\#!/usr/bin/php}) needs to be added to the top of the file. This is left out for compatibility with native PHP.
 
 It takes a query from the URL (or the form) and writes it to \texttt{query.txt}, and then calls the \texttt{webquery} program.
 
 To present a nice result to the user, I parse the original document as HTML, and show the user the first non-empty paragraph. This usually presents a nice snippet.
 
-As a final touch, I named my search engine MIRgle, and copied the Google logo colours to my own. The final result can be seen in \autoref{fig:mirgle}.
+As a final touch, I named my search engine MIRgle, and copied the Google logo colours to my own. The final result can be seen in \autoref{fig:mirgle}. In my tests, I let my index build until I had about 12000 crawled pages.
+
+\subsection{Image search}
+I also implemented image search. Images are indexed based on the title of the page where they appear and their alt-text, if available.
+
+I did not keep a list of any images searched, or even checked whether I could download the images, so there are unfortunately quite a few images that fail to load. This is unfortunate, but downloading them all would have increased the size of my local repository by a lot, and it is over 4 gigabytes already.
+
+Like the normal web search, the image search supports multiple search terms, and has some nice previews. A screenshot cann be seen in \autoref{fig:image-mirgle}.
 
 \begin{figure}
 \includegraphics[width=\textwidth]{screenshot}
 \caption{The results page of MIRgle}
 \label{fig:mirgle}
+\end{figure}
+
+\begin{figure}
+    \includegraphics[width=\textwidth]{screenshot-img}
+    \caption{The image results page of MIRgle}
+    \label{fig:image-mirgle}
 \end{figure}
 
 \end{document}
