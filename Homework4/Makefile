@@ -5,7 +5,8 @@ DIRS=data/repository \
 	data/titleindex \
 	data/linkindex \
 	data/webindex \
-	data/pageindex
+	data/pageindex \
+	data/imageindex
 
 all: webspider webquery Journal.pdf
 

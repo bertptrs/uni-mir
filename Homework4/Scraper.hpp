@@ -3,6 +3,8 @@
 
 #include <string>
 #include <unordered_set>
+#include <unordered_map>
+#include <utility>
 #include "Webclient.hpp"
 
 class Scraper
@@ -13,6 +15,7 @@ class Scraper
 		std::unordered_set<std::string> getImagelinks() const;
 		std::unordered_set<std::string> getWords() const;
 		std::unordered_set<std::string> getTitleWords() const;
+		std::unordered_map<std::string, std::unordered_set<std::string>> getImages() const;
 
 		const std::string& getData() const;
 

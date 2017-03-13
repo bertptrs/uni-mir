@@ -70,9 +70,11 @@ void Crawler::run()
 			string effective = scraper.load(entry);
 			domainVisits[LinkHelper::getDomain(entry)] = Clock::now();
 
+			auto titleWords = scraper.getTitleWords();
+
 			// update all indexes
 			indexHelper.saveWordIndex(effective, "pageindex", scraper.getWords());
-			indexHelper.saveWordIndex(effective, "titleindex", scraper.getTitleWords());
+			indexHelper.saveWordIndex(effective, "titleindex", titleWords);
 			indexHelper.saveWordIndex(effective, "webindex", LinkHelper::getURLWords(effective));
 			indexHelper.savePageData(effective, scraper.getData());
 
@@ -80,6 +82,12 @@ void Crawler::run()
 			for (auto url : scraper.getWeblinks()) {
 				queue(url);
 				indexHelper.saveLinkToURL(url, entry);
+			}
+
+			for (auto image : scraper.getImages()) {
+				auto allWords = image.second;
+				allWords.insert(titleWords.begin(), titleWords.end());
+				indexHelper.saveWordIndex(image.first, "imageindex", allWords);
 			}
 		} catch (Webclient::CrawlException ex) {
 			cerr << "Failed to load url " << entry << endl;

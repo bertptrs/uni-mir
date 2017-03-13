@@ -5,6 +5,19 @@
 
 using namespace std;
 
+template<class S>
+static inline unordered_set<string> parseStream(S& data)
+{
+	unordered_set<string> words;
+
+	string word;
+	while (data >> word) {
+		words.insert(word);
+	}
+
+	return words;
+}
+
 string Scraper::load(const string& newURL)
 {
 	url = newURL;
@@ -129,14 +142,57 @@ unordered_set<string> Scraper::getWordsFromTag(const string& tag_name) const
 
 	html_parser_cleanup(hsp);
 
-	unordered_set<string> words;
-	string word;
-	while (contents) {
-		contents >> word;
-		if (!word.empty()) {
-			words.insert(word);
+	return parseStream(contents);
+}
+
+unordered_map<string, unordered_set<string>> Scraper::getImages() const
+{
+	char tag[8];
+	char attr[20];
+	char val[1024];
+
+	unordered_map<string, unordered_set<string>> imageMap;
+	string base = url;
+
+	HTMLSTREAMPARSER *hsp = html_parser_init();
+	html_parser_set_tag_to_lower(hsp, 1);
+	html_parser_set_attr_to_lower(hsp, 1);
+	html_parser_set_tag_buffer(hsp, tag, sizeof(tag));
+	html_parser_set_attr_buffer(hsp, attr, sizeof(attr));
+	html_parser_set_val_buffer(hsp, val, sizeof(val)-1);
+
+	stringstream altText;
+	string srcURL;
+	for (char c : data) {
+		html_parser_char_parse(hsp, c);
+		if (html_parser_cmp_tag(hsp, "base", 4) && html_parser_cmp_attr(hsp, "href", 4) && html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
+			html_parser_val(hsp)[html_parser_val_length(hsp)] = '\0';
+			base = html_parser_val(hsp);
+		}
+		if (html_parser_cmp_tag(hsp, "img", 3)) {
+			if (html_parser_is_in(hsp, HTML_VALUE_ENDED)) {
+				html_parser_val(hsp)[html_parser_val_length(hsp)] = '\0';
+				if (html_parser_cmp_attr(hsp, "src", 3)) {
+					srcURL = LinkHelper::relativize(html_parser_val(hsp), base);
+				} else if (html_parser_cmp_attr(hsp, "alt", 3)) {
+					altText.str(html_parser_val(hsp));
+				}
+			}
+
+			if (html_parser_is_in(hsp, HTML_TAG_END)) {
+				if (srcURL.size()) {
+					auto words = parseStream(altText);
+					imageMap[srcURL].insert(words.begin(), words.end());
+
+					srcURL = "";
+					altText.str("");
+				}
+			}
 		}
 	}
 
-	return words;
+	html_parser_cleanup(hsp);
+
+	return imageMap;
+
 }
