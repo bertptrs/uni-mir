@@ -1,4 +1,3 @@
-#!/usr/bin/php5-cgi
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -26,6 +25,19 @@ p {
     margin-bottom: 10px;
 }
 
+div.img-result {
+    float: left;
+    background-repeat: no-repeat;
+    background-size: contain;
+}
+
+div.img-result a {
+    width: 200px;
+    height: 200px;
+    display: block;
+    text-decoration: none;
+}
+
 </style>
 </head>
 <body>
@@ -43,10 +55,11 @@ p {
 <hr>
 <?php
 if (isset($_GET['q'])) {
+    file_put_contents("query.txt", $_GET['q']);
     if (isset($_GET['search'])) {
         require 'search.php';
     } elseif (isset($_GET['image'])) {
-        echo "TODO";
+        require 'image.php';
     }
 }
 ?>

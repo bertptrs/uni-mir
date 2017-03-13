@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <sstream>
 #include <queue>
+#include <cstring>
 #include "IndexHelper.hpp"
 
 using namespace std;
@@ -103,11 +104,45 @@ vector<string> getResults(const string& query)
 
 }
 
-int main()
+vector<string> getImageResults(const string& query)
+{
+    IndexHelper helper;
+    stringstream tokenStream(query);
+
+    string token;
+    tokenStream >> token;
+
+    auto results = helper.getLinksFromIndex(token, "imageindex");
+
+    while (tokenStream >> token) {
+        cerr << "'" << token << "'" << endl;
+        auto additionalResults = helper.getLinksFromIndex(token, "imageindex");
+        cerr << additionalResults.size() << endl;
+        decltype(additionalResults) resultsCopy;
+
+        set_intersection(results.begin(), results.end(),
+                additionalResults.begin(), additionalResults.end(),
+                insert_iterator<set<string>>(resultsCopy, resultsCopy.end()));
+
+        results = resultsCopy;
+    }
+
+    return vector<string>(results.begin(), results.end());
+}
+
+int main(int argc, char** argv)
 {
 	string query = getQueryString();
-	for (auto result : getResults(query)) {
-		cout << result << endl;
-	}
+    if (argc == 1 || strcmp(argv[1], "--image")) {
+        // Do text search
+        for (auto result : getResults(query)) {
+            cout << result << endl;
+        }
+    } else {
+        // Do image search
+        for (auto result : getImageResults(query)) {
+            cout << result << endl;
+        }
+    }
 	return 0;
 }

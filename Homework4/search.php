@@ -23,7 +23,6 @@ function getSnippet($filename) {
     }
     return "";
 }
-file_put_contents("query.txt", $_GET['q']);
 $results = explode("\n", `./webquery`);
 foreach ($results as $url) {
     if (strlen($url) == 0) {
