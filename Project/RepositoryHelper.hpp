@@ -17,7 +17,6 @@ class RepositoryHelper
 		RepositoryHelper(const RepositoryHelper&) = default;
 
 		time_t itemAge(const std::string& item, const RepositoryType type) const;
-		std::string itemPath(const std::string& item, const RepositoryType type) const;
 
 		template<class T>
 			void storeData(const std::string& item, const T& data, const RepositoryType type) {
@@ -31,6 +30,7 @@ class RepositoryHelper
 		static std::string hash(const std::string&);
 
 		void verifyRepository(const RepositoryType type) const;
+		std::string itemPath(const std::string& item, const RepositoryType type) const;
 
 };
 
