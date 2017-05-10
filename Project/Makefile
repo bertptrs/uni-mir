@@ -17,7 +17,7 @@ clean:
 	$(RM) *.o
 	$(RM) -r $(DIRS)
 
-spider: spider.cpp jsoncpp.o Webclient.o | $(DIRS)
+spider: spider.cpp jsoncpp.o Webclient.o PackageCollection.o | $(DIRS)
 
 Journal.pdf: Journal.tex
 	latexmk -xelatex $<
