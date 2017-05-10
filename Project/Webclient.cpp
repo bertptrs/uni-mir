@@ -13,7 +13,7 @@ Webclient::Webclient() :
 	curl_easy_setopt(curl, CURLOPT_CONNECTTIMEOUT, 2);
 	curl_easy_setopt(curl, CURLOPT_TIMEOUT, 10);
 	curl_easy_setopt(curl, CURLOPT_ACCEPT_ENCODING, "");
-	curl_easy_setopt(curl, CURLOPT_USERAGENT, "MIRBot/1.0 - A robot made for a course at Leiden University - Abuse: l.j.peters@umail.leidenuniv.nl");
+	curl_easy_setopt(curl, CURLOPT_USERAGENT, "MIRBot/2.0 - A robot made for a course at Leiden University - Abuse: l.j.peters@umail.leidenuniv.nl");
 }
 
 Webclient::~Webclient()
@@ -22,7 +22,7 @@ Webclient::~Webclient()
 	curl_easy_cleanup(curl);
 }
 
-Value Webclient::getURL(const string& url)
+Value Webclient::getURL(const string& url, long modified)
 {
 	// Set the link
 	curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
@@ -30,12 +30,23 @@ Value Webclient::getURL(const string& url)
 	// Clear the current buffer
 	buffer.str("");
 
+	// Set caching things
+	if (modified >= 0) {
+		curl_easy_setopt(curl, CURLOPT_TIMEVALUE, modified);
+		curl_easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_IFMODSINCE);
+	} else {
+		curl_easy_setopt(curl, CURLOPT_TIMECONDITION, CURL_TIMECOND_NONE);
+	}
+
 	CURLcode res = curl_easy_perform(curl);
 	long http_code;
 
 	curl_easy_getinfo(curl, CURLINFO_RESPONSE_CODE, &http_code);
 
 	if (res != 0 || http_code != 200) {
+		if (http_code == 304) {
+			throw CachedException();
+		}
 		throw CrawlException();
 	}
 

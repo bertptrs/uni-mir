@@ -12,10 +12,12 @@ class Webclient
 		Webclient();
 		~Webclient();
 
-		// Request the given URL. The url is modified to reflect the actual URL.
-		Json::Value getURL(const std::string& url);
+		Json::Value getURL(const std::string& url, long modified = -1);
 
+		// Something went wrong while crawling
 		struct CrawlException {};
+		// The data is in the cache, so you should load it from there.
+		struct CachedException{};
 
 	private:
 		CURL* curl;
