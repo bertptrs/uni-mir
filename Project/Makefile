@@ -16,15 +16,8 @@ clean:
 	$(RM) webquery
 	$(RM) *.o
 	$(RM) -r $(DIRS)
-	latexmk -c
 
-spider: spider.cpp jsoncpp.o | $(DIRS)
-
-webspider: webspider.cpp htmlstreamparser.o Webclient.o Scraper.o LinkHelper.o Crawler.o RobotsHandler.o IndexHelper.o json| $(DIRS)
-	$(CXX) -o $@ $(CXXFLAGS) $^ -lcurl -lssl -lcrypto
-
-webquery: webquery.cpp IndexHelper.o | $(DIRS)
-	$(CXX) -o $@ $(CXXFLAGS) $^ -lssl -lcrypto
+spider: spider.cpp jsoncpp.o Webclient.o | $(DIRS)
 
 Journal.pdf: Journal.tex
 	latexmk -xelatex $<
