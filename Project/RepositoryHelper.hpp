@@ -16,13 +16,11 @@ class RepositoryHelper
 		RepositoryHelper(const std::string& dir="data");
 		RepositoryHelper(const RepositoryHelper&) = default;
 
+		// Get the age of a particular index file, or -1 on non-existing.
 		time_t itemAge(const std::string& item, const RepositoryType type) const;
+		std::ifstream readHandle(const std::string& item, const RepositoryType type) const;
+		std::ofstream writeHandle(const std::string& item, const RepositoryType type, bool truncate = false) const;
 
-		template<class T>
-			void storeData(const std::string& item, const T& data, const RepositoryType type) {
-				std::fstream f(itemPath(item, type), std::ios_base::out | std::ios_base::trunc);
-				f << data;
-			}
 
 	private:
 		const std::string basedir;

@@ -42,7 +42,20 @@ void RepositoryHelper::verifyRepository(const RepositoryType type) const
 		// Attempt to create the directory
 		assert(mkdir(path.c_str(), 0777) == 0 && "Directory should be created.");
 	}
+}
 
+ifstream RepositoryHelper::readHandle(const string& item, const RepositoryType type) const
+{
+	return ifstream(itemPath(item, type));
+}
+
+ofstream RepositoryHelper::writeHandle(const std::string& item, const RepositoryType type, bool truncate) const
+{
+	auto flags = truncate
+		? (ios_base::out | ios_base::app)
+		: (ios_base::out | ios_base::trunc);
+
+	return ofstream(itemPath(item, type), flags);
 }
 
 string RepositoryHelper::hash(const string& data)
