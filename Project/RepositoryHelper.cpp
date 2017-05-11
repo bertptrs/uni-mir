@@ -46,7 +46,12 @@ void RepositoryHelper::verifyRepository(const RepositoryType type) const
 
 ifstream RepositoryHelper::readHandle(const string& item, const RepositoryType type) const
 {
-	return ifstream(itemPath(item, type));
+	auto s = ifstream(itemPath(item, type));
+	if (!s.good()) {
+		throw ItemNotAvailable();
+	}
+
+	return s;
 }
 
 ofstream RepositoryHelper::writeHandle(const std::string& item, const RepositoryType type, bool truncate) const
