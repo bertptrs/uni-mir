@@ -1,0 +1,52 @@
+#!/usr/bin/env python3
+
+import argparse
+import hashlib
+import os
+
+import networkx as nx
+
+def hash(thing):
+    hasher = hashlib.md5(thing.encode("ascii"))
+    return hasher.hexdigest()
+
+
+def get_arguments():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("dataDir", help="Index repository directory", default="data", nargs="?")
+
+    return parser.parse_args()
+
+
+def packages(dataDir):
+    packageFile = os.path.join(dataDir, "packages")
+    try:
+        with open(packageFile) as f:
+            for line in f:
+                yield line.strip()
+    except FileNotFoundError:
+        pass
+
+
+def revdeps(dataDir, package):
+    depFile = os.path.join(dataDir, "2", hash(package))
+    try:
+        with open(depFile) as f:
+            for line in f:
+                yield line.strip()
+    except FileNotFoundError:
+        pass
+
+
+def main():
+    args = get_arguments()
+
+    G = nx.DiGraph()
+
+    for package in packages(args.dataDir):
+        for revdep in revdeps(args.dataDir, package):
+            G.add_edge(revdep, package)
+
+
+if __name__ == "__main__":
+    main()
