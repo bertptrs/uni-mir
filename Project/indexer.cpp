@@ -7,36 +7,90 @@
 
 using namespace std;
 
+class Indexer {
+	public:
+		Indexer(const string& dataDir);
+
+		bool index(const string& packageName) const;
+
+	private:
+		RepositoryHelper helper;
+
+		Json::Value loadPackageData(const string& packageName) const;
+
+		template<class T>
+			void addToIndices(const string& word, const T& indices, RepositoryType type) const {
+				for (auto& index : indices) {
+					ofstream handle = helper.writeHandle(index, type);
+					handle << word << "\n";
+				}
+			}
+
+		template<class T>
+			void addToIndex(const T& items, const string& index, RepositoryType type) const {
+				if (items.empty()) {
+					return;
+				}
+
+				ofstream handle = helper.writeHandle(index, type);
+				for (auto& item : items) {
+					handle << item << "\n";
+				}
+			}
+};
+
+Indexer::Indexer(const string& dataDir) : helper(dataDir)
+{
+}
+
+bool Indexer::index(const string& packageName) const
+{
+	try {
+		const auto data = loadPackageData(packageName);
+
+		set<string> keywordList, depList;
+
+		// Iterate over package versions
+		for (auto& version : data["packages"][packageName]) {
+			auto& keywords = version["keywords"];
+
+			transform(keywords.begin(), keywords.end(),
+					insert_iterator<set<string>>(keywordList, keywordList.begin()),
+					[](const Json::Value& x) { return x.asString(); });
+
+			const auto dependencies = version["require"].getMemberNames();
+
+			depList.insert(dependencies.begin(), dependencies.end());
+		}
+
+		addToIndices(packageName, keywordList, RepositoryType::KEYWORDS);
+		addToIndices(packageName, depList, RepositoryType::REVDEPS);
+		addToIndex(depList, packageName, RepositoryType::DEPENDS);
+
+		return true;
+	} catch (Json::LogicError ex) {
+		cerr << "Error while parsing " << packageName << ":\n"
+			<< ex.what() << endl;
+		return false;
+	} catch (RepositoryHelper::ItemNotAvailable) {
+		return false;
+	}
+}
+
+Json::Value Indexer::loadPackageData(const string& packageName) const
+{
+	auto dataStream = helper.readHandle(packageName, RepositoryType::PACKAGES);
+	Json::Value data;
+
+	dataStream >> data;
+
+	return data;
+}
+
 void showHelp(const char* argv[])
 {
 	cerr << "Usage: " << argv[0] << " [data dir]" << endl;
 	exit(1);
-}
-
-void doIndex(const string& package, const RepositoryHelper& helper)
-{
-	Json::Value data;
-	try {
-		auto dataStream = helper.readHandle(package, RepositoryType::PACKAGES);
-		dataStream >> data;
-	} catch (RepositoryHelper::ItemNotAvailable) {
-		cerr << "Missing repository data for " << package << endl;
-		return;
-	}
-
-	set<string> keywords;
-
-	for (const auto version : data["packages"][package]) {
-		auto& k = version["keywords"];
-
-		transform(k.begin(), k.end(),
-				insert_iterator<set<string>>(keywords, keywords.begin()),
-				[](Json::Value x) { return x.asString(); });
-	}
-
-	for (const auto& keyword : keywords) {
-		helper.writeHandle(package, RepositoryType::KEYWORDS) << keyword << "\n";
-	}
 }
 
 int main(int argc, const char* argv[])
@@ -56,10 +110,12 @@ int main(int argc, const char* argv[])
 			showHelp(argv);
 	}
 
-	RepositoryHelper helper(dataDir);
+	Indexer indexer(dataDir);
 
 	for (auto package : PackageCollection()) {
-		doIndex(package, helper);
+		if (indexer.index(package)) {
+			//cout << package << "\n";
+		}
 	}
 
 }

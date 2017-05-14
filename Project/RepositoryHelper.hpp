@@ -9,6 +9,8 @@ enum class RepositoryType
 {
 	PACKAGES = 0,
 	KEYWORDS = 1,
+	REVDEPS  = 2,
+	DEPENDS  = 3,
 };
 
 class RepositoryHelper
