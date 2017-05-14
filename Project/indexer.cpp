@@ -1,6 +1,7 @@
 #include <iostream>
 #include <set>
 #include <algorithm>
+#include <fstream>
 #include "json/json.h"
 #include "PackageCollection.hpp"
 #include "RepositoryHelper.hpp"
@@ -111,10 +112,11 @@ int main(int argc, const char* argv[])
 	}
 
 	Indexer indexer(dataDir);
+	ofstream packages(string(dataDir) + "/packages");
 
 	for (auto package : PackageCollection()) {
 		if (indexer.index(package)) {
-			//cout << package << "\n";
+			packages << package << "\n";
 		}
 	}
 
