@@ -1,0 +1,14 @@
+{
+	"conjunctive": false,
+
+	"terms": [
+		{
+			"type": "keyword",
+			"word": "log"
+		},
+		{
+			"type": "name",
+			"word": "mono"
+		}
+	]
+}
