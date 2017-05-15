@@ -1,0 +1,13 @@
+# First, set-up a modern GCC verion
+
+. /vol/share/software/gcc/5.3.0-profile
+export LD_LIBRARY_PATH="/vol/share/software/gcc/5.3.0/lib64/:$LD_LIBRARY_PATH"
+
+# Second, configure python and create a virtualenv.
+source /vol/share/software/python/3.5.2-bashrc
+
+envname=`mktemp -d`
+issc_virtualenv "$envname"
+source "$envname/bin/activate"
+
+pip install networkx scipy

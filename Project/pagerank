@@ -38,15 +38,6 @@ def revdeps(dataDir, package):
         pass
 
 
-def compute_pagerank(G):
-    try:
-        # First, try the specialized option: scipy
-        return nx.pagerank_scipy(G)
-    except ImportError:
-        # Else, use slow, pure-python implementation
-        return nx.pagerank(G)
-
-
 def save_pagerank(dataDir, pr):
     pr_filename = os.path.join(dataDir, "pagerank")
     with open(pr_filename, "w") as f:
@@ -64,7 +55,7 @@ def main():
         for revdep in revdeps(args.dataDir, package):
             G.add_edge(revdep, package)
 
-    pr = compute_pagerank(G)
+    pr = nx.pagerank_scipy(G)
     save_pagerank(args.dataDir, pr)
 
 
