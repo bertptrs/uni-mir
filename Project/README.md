@@ -15,3 +15,41 @@ To compile and run this program, you need:
 This all can be available on ISSC machines, but requires some setup. You
 can `source environment_issc` to attempt to set this up automatically,
 or alternatively set this up by hand.
+
+## Building
+
+After correctly setting up the environment, all programs can be built by
+running `make`. It is recommended to run this with the `-j` option, in
+order to speed up the build.
+
+## Usage
+
+There are various programs in the final folder:
+
+- `download` downloads every package meta file from packagist and
+  saves it into the repository. It uses caching to speed up the download
+  when refreshing the index, and has no harmful side effects when run
+  multiple times.
+
+- `indexer` creates the actual index of the packages. It can be run
+  multiple times, but when you do, you should run `dedup` in order to
+  clean up the repository.
+
+- `dedup` removes duplicates from all indices. Unfortunately, it is very
+  slow, so if temporary absense of the index is not a problem, I
+  recommend deleting the indixes (repository 1 and up) and then building
+  them again.
+
+- `pagerank` finally computes the pagerank of all packages for ranking
+  purposes. Running this multiple times is idempotent.
+
+All of these programs take an optional parameter: the location of the
+data repository, which defaults to "data" in the current working
+directory. The directory is assumed to exist and is created by the
+Makefile by default. Building the index is done by running (in order):
+
+1. download
+2. indexer
+3. pagerank
+
+The resulting index is about 2.6 GiB.
