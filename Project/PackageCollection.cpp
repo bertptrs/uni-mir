@@ -13,6 +13,15 @@ PackageCollection::PackageCollection()
 	}
 }
 
+
+PackageCollection::PackageCollection(istream& input)
+{
+	string buffer;
+	while (getline(input, buffer)) {
+		packages.push_back(buffer);
+	}
+}
+
 PackageCollection::const_iterator PackageCollection::begin() const
 {
 	return packages.begin();

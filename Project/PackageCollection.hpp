@@ -12,6 +12,7 @@ class PackageCollection
 		typedef PackageList::const_iterator const_iterator;
 
 		PackageCollection();
+		PackageCollection(std::istream& input);
 		PackageCollection(const PackageCollection&) = default;
 
 		// Generic constructor to initialize from anything resembling a collection
