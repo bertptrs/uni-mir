@@ -4,3 +4,5 @@ indexer
 
 # Default data dir
 data
+*.d
+search

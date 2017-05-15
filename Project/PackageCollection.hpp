@@ -15,10 +15,6 @@ class PackageCollection
 		PackageCollection(std::istream& input);
 		PackageCollection(const PackageCollection&) = default;
 
-		// Generic constructor to initialize from anything resembling a collection
-		template<class T>
-			PackageCollection(const T& packages): packages(packages.begin(), packages.end()) {}
-
 		const_iterator begin() const;
 		const_iterator end() const;
 		size_t size() const;
