@@ -38,14 +38,34 @@ def revdeps(dataDir, package):
         pass
 
 
+def compute_pagerank(G):
+    try:
+        # First, try the specialized option: scipy
+        return nx.pagerank_scipy(G)
+    except ImportError:
+        # Else, use slow, pure-python implementation
+        return nx.pagerank(G)
+
+
+def save_pagerank(dataDir, pr):
+    pr_filename = os.path.join(dataDir, "pagerank")
+    with open(pr_filename, "w") as f:
+        for k in sorted(pr.keys()):
+            print(k, pr[k], file=f)
+
+
 def main():
     args = get_arguments()
 
     G = nx.DiGraph()
 
     for package in packages(args.dataDir):
+        G.add_node(package)
         for revdep in revdeps(args.dataDir, package):
             G.add_edge(revdep, package)
+
+    pr = compute_pagerank(G)
+    save_pagerank(args.dataDir, pr)
 
 
 if __name__ == "__main__":
