@@ -27,6 +27,7 @@ class Searcher
 
 		ResultList searchName(const std::string&) const;
 		ResultList searchKeywords(const std::string&) const;
+		ResultList searchDescription(const std::string&) const;
 
 		ResultList sortResults(const ResultList& results) const;
 

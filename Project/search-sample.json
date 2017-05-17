@@ -9,6 +9,10 @@
 		{
 			"type": "name",
 			"word": "mono"
+		},
+		{
+			"type": "description",
+			"word": "logs"
 		}
 	]
 }

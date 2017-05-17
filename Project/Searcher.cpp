@@ -83,6 +83,8 @@ Searcher::ResultList Searcher::search(istream& request) const
 			resultsBuffer = searchKeywords(word);
 		} else if (type == "name") {
 			resultsBuffer = searchName(word);
+		} else if (type == "description") {
+			resultsBuffer = searchDescription(word);
 		} else {
 			cerr << type << " is not a valid query type." << endl;
 			exit(1);
@@ -104,9 +106,24 @@ Searcher::ResultList Searcher::search(istream& request) const
 
 Searcher::ResultList Searcher::searchKeywords(const string& word) const
 {
-	auto handle = helper.readHandle(word, RepositoryType::KEYWORDS);
+	try {
+		auto handle = helper.readHandle(word, RepositoryType::KEYWORDS);
 
-	return readFile(handle);
+		return readFile(handle);
+	} catch (RepositoryHelper::ItemNotAvailable) {
+		return {};
+	}
+}
+
+Searcher::ResultList Searcher::searchDescription(const string& word) const
+{
+	try {
+		auto handle = helper.readHandle(word, RepositoryType::DESCRIPT);
+
+		return readFile(handle);
+	} catch (RepositoryHelper::ItemNotAvailable) {
+		return {};
+	}
 }
 
 

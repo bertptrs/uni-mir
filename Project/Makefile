@@ -20,7 +20,7 @@ clean:
 	$(RM) -r $(DIRS)
 
 newindex: indexer
-	$(RM) -r data/1 data/2 data/3
+	$(RM) -r data/1 data/2 data/3 data/4
 	./indexer
 	./pagerank
 

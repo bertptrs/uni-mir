@@ -2,6 +2,9 @@
 #include <set>
 #include <algorithm>
 #include <fstream>
+#include <sstream>
+#include <cctype>
+
 #include "json/json.h"
 #include "PackageCollection.hpp"
 #include "RepositoryHelper.hpp"
@@ -40,6 +43,36 @@ class Indexer {
 			}
 };
 
+
+static set<string> extractKeywords(const string& data)
+{
+	stringstream dataStream(data), wordBuffer;
+	set<string> keywords;
+
+	char c = dataStream.get();
+	while (dataStream) {
+		if (isalnum(c)) {
+			wordBuffer << (char) tolower(c);
+		} else {
+			// Word boundary
+			string word = wordBuffer.str();
+			if (!word.empty()) {
+				keywords.insert(word);
+				wordBuffer.str("");
+			}
+		}
+
+		c = dataStream.get();
+	}
+
+	string word = wordBuffer.str();
+	if (!word.empty()) {
+		keywords.insert(word);
+	}
+
+	return keywords;
+}
+
 Indexer::Indexer(const string& dataDir) : helper(dataDir)
 {
 }
@@ -49,7 +82,7 @@ bool Indexer::index(const string& packageName) const
 	try {
 		const auto data = loadPackageData(packageName);
 
-		set<string> keywordList, depList;
+		set<string> keywordList, depList, descriptionList;
 
 		// Iterate over package versions
 		for (auto& version : data["packages"][packageName]) {
@@ -59,6 +92,9 @@ bool Indexer::index(const string& packageName) const
 					insert_iterator<set<string>>(keywordList, keywordList.begin()),
 					[](const Json::Value& x) { return x.asString(); });
 
+			const auto descriptionWords = extractKeywords(version["description"].asString());
+			descriptionList.insert(descriptionWords.begin(), descriptionWords.end());
+
 			const auto dependencies = version["require"].getMemberNames();
 
 			depList.insert(dependencies.begin(), dependencies.end());
@@ -66,6 +102,7 @@ bool Indexer::index(const string& packageName) const
 
 		addToIndices(packageName, keywordList, RepositoryType::KEYWORDS);
 		addToIndices(packageName, depList, RepositoryType::REVDEPS);
+		addToIndices(packageName, descriptionList, RepositoryType::DESCRIPT);
 		addToIndex(depList, packageName, RepositoryType::DEPENDS);
 
 		return true;

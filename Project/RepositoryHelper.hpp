@@ -11,6 +11,7 @@ enum class RepositoryType
 	KEYWORDS = 1,
 	REVDEPS  = 2,
 	DEPENDS  = 3,
+	DESCRIPT = 4,
 };
 
 class RepositoryHelper
