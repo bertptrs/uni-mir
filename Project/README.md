@@ -35,11 +35,6 @@ There are various programs in the final folder:
   multiple times, but when you do, you should run `dedup` in order to
   clean up the repository.
 
-- `dedup` removes duplicates from all indices. Unfortunately, it is very
-  slow, so if temporary absense of the index is not a problem, I
-  recommend deleting the indixes (repository 1 and up) and then building
-  them again.
-
 - `pagerank` finally computes the pagerank of all packages for ranking
   purposes. Running this multiple times is idempotent.
 
@@ -53,3 +48,14 @@ Makefile by default. Building the index is done by running (in order):
 3. pagerank
 
 The resulting index is about 2.6 GiB.
+
+## Search front-end
+
+The search front-end is located in the "interface" folder. Composer must
+be used to install its dependencies. After that, use any PHP capable
+webserver to run `index.php`, or any CGI-capable webserver to run
+`index2.php`.
+
+`config.php` contains the configuration, including its relative location
+to the data dir and executable dir. If those are not default, change as
+needed.
