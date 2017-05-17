@@ -3,10 +3,10 @@
 require 'config.php';
 require 'vendor/autoload.php';
 
-$types = array (
-    "name" => "Package name",
-    "keyword" => "Package keywords",
-    "description" => "Package description"
+$types = array(
+    "name"        => "Package name",
+    "keyword"     => "Package keywords",
+    "description" => "Package description",
 );
 
 function splitTerms($data)
@@ -88,9 +88,12 @@ if (isset($_GET['name'])) {
         foreach ($types as $key => $desc) {
             ?>
             <div class="form-group">
-                <input class="form-control" name="<?php echo $key; ?>" placeholder="<?php echo $desc; ?>" value="<?php if (isset($_GET[$key])) echo htmlentities($_GET[$key]); ?>">
+                <input class="form-control" name="<?php echo $key; ?>" placeholder="<?php echo $desc; ?>"
+                       value="<?php if (isset($_GET[$key])) {
+                           echo htmlentities($_GET[$key]);
+                       } ?>">
             </div>
-        <?php
+            <?php
         }
         ?>
         <button class="btn btn-primary" type="submit">
@@ -103,6 +106,7 @@ if (isset($_GET['name'])) {
     if (isset($results)) {
         echo '<h2>Results</h2>';;
         if (count($results) > 0) {
+            $i = 0;
             foreach ($results as $result) {
                 ?>
                 <div class="result">
@@ -114,7 +118,11 @@ if (isset($_GET['name'])) {
                     ?>
                 </div>
                 <?php
+                if (++$i >= RESULT_LIMIT) {
+                    break;
+                }
             }
+            echo '<hr><p>' . $i . ' of ' . count($results) . ' shown.</p>';
         } else {
             echo '<p>No results found.</p>';
         }
