@@ -1,0 +1,100 @@
+\documentclass{beamer}
+\usetheme{default}
+
+\usepackage{mathtools}
+\usepackage{graphicx}
+\usepackage{siunitx}
+\usepackage{hyperref}
+
+\DeclarePairedDelimiter\ceil{\lceil}{\rceil}
+\DeclarePairedDelimiter\floor{\lfloor}{\rfloor}
+
+\title{Final Project}
+
+\author{Bert Peters}
+% - Give the names in the same order as the appear in the paper.
+% - Use the \inst{?} command only if the authors have different
+%   affiliation.
+
+\institute{Leiden Institute for Advanced Computer Science}
+% - Use the \inst command only if there are several affiliations.
+% - Keep it simple, no one is interested in your street address.
+
+\date{Multimedia Information Retrieval, spring 2017}
+
+% Let's get started
+\begin{document}
+
+\begin{frame}
+	\titlepage
+\end{frame}
+
+\begin{frame}{Confession}
+	\centering
+	\pause
+	\includegraphics[width=\textwidth]{php-logo}
+\end{frame}
+
+\begin{frame}{Packagist}
+	\begin{itemize}
+		\item De-facto package repository
+		\item Composer dependency manager/installer
+			\pause
+		\item Problem: Its search is bad.
+			\pause
+			\begin{itemize}
+				\item Only search all text fields at the same time
+				\item No version constraints
+				\item Only text search
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Project}
+	Implement better search for packagist
+	\begin{itemize}
+		\item Dependency search
+		\item Separate title/keywords/description search
+		\item Version constrained search
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Data}
+	\begin{itemize}
+		\item Will look at entire Packagist repository
+			\begin{itemize}
+				\item 138,100 packages\footnote{Source: \url{https://packagist.org/statistics}}
+				\item 833,600 package versions
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Implementation}
+	\begin{itemize}
+		\item Data is available in JSON REST APIs
+			\begin{itemize}
+				\item Fair use policy, but no explicit rate limits
+			\end{itemize}
+		\item Can reuse search engine code for text indices
+		\item Can reuse existing multi-keyword code for implementing multi-criteria search
+	\end{itemize}
+\end{frame}
+
+\begin{frame}{Evaluation}
+	\begin{itemize}
+		\item Exact solutions, so no real accuracy measures
+		\item Instead, use performance measures
+			\begin{itemize}
+				\item Indexing speed
+				\item Index size
+				\item Query speed
+			\end{itemize}
+	\end{itemize}
+\end{frame}
+
+\begin{frame}
+	\Huge
+	Questions?
+\end{frame}
+
+\end{document}
