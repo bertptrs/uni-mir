@@ -28,7 +28,21 @@
 
 \section{Introduction}
 
+In PHP, as with every major programming platform, the main task is not with using code you wrote, but with the code someone else did. Libraries of all kinds exist to prevent the repeated invention of the wheel, but in order to use them they need to be found.
+
+Originally, this was through the PHP Application and Extension Repository (PEAR), a meticulously curated repository of \emph{the} best PHP packages for everything. It had a few downsides, but its most notable one was that it was supposed to be installed globally, rather than application specific. This posed a problem for shared hosting providers, which were at the time (and to some extend still today) the main platform for PHP. Even those that did provide PEAR were faced with the problem that only one version of a specific package could be installed at a time, and backwards compatibility was hardly ever a concern.
+
+In 2012, the package manager Composer and its package repository Packagist was created~\cite{composer-release} to address this problem. The solution: install all dependency on a per-application basis.
+
+A problem that still persists, is that people do cannot find the packages they need, even if they exist are available. Packagist includes a search bar on its website~\cite{packagist}, but it is rather bad at finding packages you need, rarely having the industry standard solution on the first page. In this paper, we will explore and create a new way of searching the Packagist repository.
+
 \section{Related work}
+
+There are various package managers for various languages. Java has Maven\footnote{\url{https://maven.apache.org/}}, JavaScript has \texttt{npm}\footnote{\url{https://www.npmjs.com/}}, Python has Pip\footnote{\url{https://pypi.python.org/pypi}}, and Rust has Cargo\footnote{\url{https://crates.io/}}, to name a few, each with their own search functionality. Still, for each of those, using Google and adding ``[language] package'' tends to provide better results than using the native search.
+
+Even though the above suggests that improving this might be an interesting topic, there is very little existing literature discussing this. Instead, we looked at general node-relevance algorithms. In~\cite{google}, Brin et al use the directed links in a network of nodes in order to determine this. In this case, being linked makes you importan, and linking to important nodes makes you slightly more important too.
+
+A simpler idea behind this is Pagerank~\cite{pagerank} where only the incoming edges provide you with relevance, as well as who links to you. We will apply this idea to the dependencies between packages.
 
 \section{Implementation}
 
@@ -149,8 +163,9 @@ In Packagist, we always find \texttt{psr/log}, but Monolog only shows up for ``l
 
 We have created a fully functional search engine for the Packagist package repository, and compared it to the currently available search system. We found we have comparable, or slightly better results. The existing system is sometimes slightly still better, as its substring search on the description appears to be very useful in various corner cases.
 
-Performance wise the system is up to par, as the results are as instant here as they are for the existing search. An interesting experiment would be to implement the instant-search of the packagist website and see how well that wors.
+It seems that pagerank is an adequate metric for package relevancy at the moment, with the most popular and important packages generally at the top of the list. In this paper, we focussed on packages that everyone could need. It might be interesting to see how well this performs for the needs of the more niche areas, of which there are very few on Packagist.
 
+Performance wise the system is up to par, as the results are as instant here as they are for the existing search. An interesting experiment would be to implement the instant-search of the packagist website and see how well that wors.
 
 An area that still needs the most improvement, is the interface. Our current mock-up works, but it might be more user-friendly to take one kind of search terms, and then intelligently split over the various indices. That topic will need further research.
 
