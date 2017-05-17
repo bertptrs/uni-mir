@@ -26,6 +26,29 @@
 
 \section{Implementation}
 
+Our implementation consists of 4 main parts, a \emph{downloader} for getting all data off Packagist, an \emph{indexer} to create the search index, a \emph{ranker} that commputes the relevance of each package, and a \emph{searcher} to get the final search results. We also include a simple front end for the searcher, but that component is optional. In the following sections, we will discuss each of these components in more detail.
+
+For our data structure, we opted to use flat files using filenames as our indexing mechanism. This gives reasonable performance at very little implementation cost.
+
+\subsection{Downloader}
+
+\subsection{Indexer}
+
+\subsection{Ranker}
+
+There are various metrics that could be used for the relative importance of a package. Packagist provides several; for example the number of downloads in the past week, or the number of stars its Github repository has. Both have its flaws; some packages have hugely inflated download counts due to continuous integration builds, and buying Github stars is not unheard of. %TODO: reference
+
+Instead of using one of the provided metrics, we instead opted to use a packages pagerank %TODO: reference pagerank
+in the dependency graph. In this graph, each package is a node and a directed edge from $a$ to $b$ exists if $a$ depends on $b$. For these purposes, we ignore version constraints, and group all the dependencies of all packages together.
+
+The rationale behind this is the same as with the download count: more people use it, so it is probably more important. However, in contrast to the download count, it is influenced less by CI systems. This system too could be gamed, by uploading countless dummy packages that depend on your main one, but this is easily discovered, and not currently a problem.
+
+Computing the actual pagerank is relatively cheap, since a dependency contains very few cycles.\footnote{a}
+
+
+
+\subsection{Searcher}
+
 \section{Analysis}
 
 \section{Conclusion}
