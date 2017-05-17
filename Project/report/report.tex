@@ -1,5 +1,6 @@
 \documentclass{article}
 
+\usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{listings}
 \usepackage{parskip}
@@ -83,9 +84,75 @@ Using the above, it is easy to see that we have an upper bound of $O(km)$ for co
 
 For ranking results, we need to match each package to its rank number. We can do this in $O(m)$ time by using the fact that both the resultlist and the ranklist are sorted, iterating over the latter and advancing the first upon matching. Then we can finally sort the list in $O(n \log n)$ using any sorting algorithm\footnote{We use the sorting algorithm from \texttt{glibc} which is a variation on quicksort, but any algorithm will do.} and output the result.
 
+\subsection{Search front-end}
+
+For the purpose of testing, we created a simple web front-end for our search engine in PHP. A screenshot of it can be seen in \autoref{fig:screenshot}. It includes all three search term types, and each field will be split into more keywords as needed.
+
+The results are shown with their description fields, as well as their latest stable version, if applicable. For comparing versions, we use Composer itself, and the mark-up is slightly enhanced with Twitter Bootstrap, both installed using composer.
+
 \section{Analysis}
 
+In this section, we will discuss some details about the retrieved data, and compare some results between the native Packagist search and our own search.
+
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{screenshot}
+	\caption{Screenshot of the search front-end}
+	\label{fig:screenshot}
+\end{figure}
+
+\subsection{Dataset}
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{dependencies}
+	\caption{Distribution of number of dependents/dependencies}
+	\label{fig:dependencies}
+\end{figure}
+
+The first thing we did to verify our hypothesis that the dependency graph would be a good indicator of relevance, is look at the distribution of dependencies and dependents. A visualisation of this is shown in \autoref{fig:dependencies}.
+
+What we see is that there is one package on which nearly half all packages depend. This is because you can list PHP itself as a dependency to declare compatibility. It is also possible to require PHP extensions this way, and about 1\% of packages has cURL as its dependency.
+
+The package with the most dependencies is Drupal, a PHP content management system. It has moved to composer a few years ago, and has since been split up in submodules of its original form. Of its 236 dependencies, 198 are Drupal parts.
+
+\begin{figure}
+	\centering
+	\includegraphics[width=\textwidth]{keywords}
+	\caption{Distribution of frequency of keywords}
+	\label{fig:keywords}
+\end{figure}
+
+Another thing we looked at was the relative frequency of the keywords, of which the distribution can be seen in \autoref{fig:keywords}. Unfortunately, the index does not contain enough information to reconstruct the common words (other than reversing MD5 hashes) but the general distribution appears to be power-law like, which is common in natural language~\cite{zipf}.
+
+\subsection{Search comparison}
+
+For this section, we look at a two case studies for common library searches. In each case, we want to find certain packages, and compare the results for both.
+
+\subsubsection{Templating}
+
+In this case, we want to find a templating library for PHP, to avoid interspersing PHP and HTML\footnote{Which, coincedentally, our search front-end is riddled with.}. In this case, we look at both the description and keyword field, since a name doesn't say much about what it does. On packagist, we just type ``template'' into the search bar.
+
+We should find references to Twig and Smarty, the current and former leading libraries in this area. Searching by tag, we don't find either, but do find Latte, which is popular as well, and we find some libraries interacting with Twig. Using the description field, we find both as our first two results, which is nice.
+
+Using packagist we find neither (at least not on the first page) and the only remotely popular one is the templating engine included in the PHPixie framework. It seems however that Packagist does a substring search on the description, while prefering exact keyword results if available. When we use the keyword ``templat'' rather than ``template'' we do find both.
+
+\subsubsection{Logging}
+
+We want to find a nice logging library to suit our needs. The most important things are \texttt{psr/log} and Monolog, the unofficial logging library interface standard and its most popular implementation respectively. In our search engine, both show up for the keyword ``log'' and for keyword/description ``logging''.
+
+In Packagist, we always find \texttt{psr/log}, but Monolog only shows up for ``loggi''. We suspect that this is once again because of the substring search in the description.
+
+
 \section{Conclusion}
+
+We have created a fully functional search engine for the Packagist package repository, and compared it to the currently available search system. We found we have comparable, or slightly better results. The existing system is sometimes slightly still better, as its substring search on the description appears to be very useful in various corner cases.
+
+Performance wise the system is up to par, as the results are as instant here as they are for the existing search. An interesting experiment would be to implement the instant-search of the packagist website and see how well that wors.
+
+
+An area that still needs the most improvement, is the interface. Our current mock-up works, but it might be more user-friendly to take one kind of search terms, and then intelligently split over the various indices. That topic will need further research.
 
 \bibliography{bibliography}{}
 \bibliographystyle{plain}
