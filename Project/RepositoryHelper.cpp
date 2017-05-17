@@ -57,8 +57,8 @@ ifstream RepositoryHelper::readHandle(const string& item, const RepositoryType t
 ofstream RepositoryHelper::writeHandle(const std::string& item, const RepositoryType type, bool truncate) const
 {
 	auto flags = truncate
-		? (ios_base::out | ios_base::app)
-		: (ios_base::out | ios_base::trunc);
+		? (ios_base::out | ios_base::trunc)
+		: (ios_base::out | ios_base::app);
 
 	return ofstream(itemPath(item, type), flags);
 }
