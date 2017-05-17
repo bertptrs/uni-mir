@@ -29,6 +29,11 @@
 
 # Generatables
 *.pdf
+*.idea
+*.log
+*.nav
+*.snm
+*.synctex.gz
 
 # Swap files
 *.swp
