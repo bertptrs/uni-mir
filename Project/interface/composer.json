@@ -1,0 +1,16 @@
+{
+    "name": "bertptrs/packasearch",
+    "description": "Search engine for packagist",
+    "type": "project",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Bert Peters",
+            "email": "bert@bertptrs.nl"
+        }
+    ],
+    "require": {
+        "composer/semver": "^1.4.2",
+        "twbs/bootstrap": "^3.0.0"
+    }
+}
