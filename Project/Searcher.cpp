@@ -2,9 +2,9 @@
 #include <iterator>
 #include <cstdlib>
 #include <sstream>
+#include <cassert>
 
 #include "Searcher.hpp"
-#include "PackageCollection.hpp"
 
 using namespace std;
 
@@ -54,6 +54,14 @@ Searcher::Searcher(const string& dataDir): dataDir(dataDir), helper(dataDir)
 {
 }
 
+ifstream Searcher::getHandle(const string& filename) const
+{
+	stringstream fb;
+	fb << dataDir << "/" << filename;
+
+	return ifstream(fb.str());
+}
+
 Searcher::ResultList Searcher::search(istream& request) const
 {
 	const Json::Value requestData = loadJson(request);
@@ -80,8 +88,6 @@ Searcher::ResultList Searcher::search(istream& request) const
 			exit(1);
 		}
 
-		// TODO: actually use the query thingy
-
 		if (!initialized) {
 			results = resultsBuffer;
 			initialized = true;
@@ -92,7 +98,7 @@ Searcher::ResultList Searcher::search(istream& request) const
 
 	// TODO: sort the results
 
-	return results;
+	return sortResults(results);
 }
 
 
@@ -103,17 +109,16 @@ Searcher::ResultList Searcher::searchKeywords(const string& word) const
 	return readFile(handle);
 }
 
+
 Searcher::ResultList Searcher::searchName(const string& word) const
 {
-	stringstream sb;
-	sb << dataDir << "/" << "packages";
-
-	ifstream packageHandle(sb.str());
+	ifstream packageHandle = getHandle("packages");
 
 	ResultList results;
-	for (auto& package : PackageCollection(packageHandle)) {
+	string package;
+	while (getline(packageHandle, package)) {
 		if (package.find(word) != string::npos) {
-			results.push_back(package);
+			results.emplace_back(move(package));
 		}
 	}
 
@@ -129,4 +134,41 @@ Json::Value Searcher::loadJson(istream& input)
 	input >> value;
 
 	return value;
+}
+
+Searcher::ResultList Searcher::sortResults(const ResultList& results) const
+{
+	ifstream pagerankHandle = getHandle("pagerank");
+
+	vector<pair<double, string>> weightedResults;
+
+	string packageName;
+	double packageWeight;
+	size_t pos = 0;
+
+	// Combine weights with names, using that both lists are sorted.
+	while (pagerankHandle >> packageName >> packageWeight) {
+		for (; pos < results.size() && results[pos] < packageName; pos++);
+
+		if (pos >= results.size()) {
+			break;
+		}
+
+		if (packageName == results[pos]) {
+			weightedResults.emplace_back(packageWeight, move(packageName));
+			pos++;
+		}
+	}
+
+	assert(weightedResults.size() == results.size() && "All results should have been found.");
+
+	sort(weightedResults.begin(), weightedResults.end(), greater<pair<double, string>>());
+
+	// Extract the package names from the weighted, sorted list.
+	ResultList sortedResults;
+	for (auto result : weightedResults) {
+		sortedResults.emplace_back(move(result.second));
+	}
+
+	return sortedResults;
 }

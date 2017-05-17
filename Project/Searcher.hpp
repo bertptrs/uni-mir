@@ -27,6 +27,11 @@ class Searcher
 
 		ResultList searchName(const std::string&) const;
 		ResultList searchKeywords(const std::string&) const;
+
+		ResultList sortResults(const ResultList& results) const;
+
+		// Get a file somewhere in the data directory
+		std::ifstream getHandle(const std::string& filename) const;
 };
 
 #endif

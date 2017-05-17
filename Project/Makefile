@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=-Wall -Wextra -std=c++14 -O2 -g -flto
+CXXFLAGS=-Wall -Wextra -std=c++14 -g
 LDLIBS=-lcurl -lssl -lcrypto
 
 DIRS=data
@@ -11,17 +11,24 @@ OBJECTS=\
 		Searcher.o \
 		RepositoryHelper.o
 
+.PHONY: all clean newindex
+
 all: download indexer search
 
 clean:
 	$(RM) *.o spider
 	$(RM) -r $(DIRS)
 
+newindex: indexer
+	$(RM) -r data/1 data/2 data/3
+	./indexer
+	./pagerank
+
 download: download.cpp jsoncpp.o Webclient.o PackageCollection.o RepositoryHelper.o | $(DIRS)
 
 indexer: indexer.cpp jsoncpp.o Webclient.o PackageCollection.o RepositoryHelper.o | $(DIRS)
 
-search: search.cpp Searcher.o jsoncpp.o PackageCollection.o RepositoryHelper.o | $(DIRS)
+search: search.cpp Searcher.o jsoncpp.o RepositoryHelper.o | $(DIRS)
 
 Journal.pdf: Journal.tex
 	latexmk -xelatex $<
