@@ -1,7 +1,12 @@
 \documentclass{article}
 
 \usepackage{hyperref}
+\usepackage{listings}
 \usepackage{parskip}
+
+% Listings configuration
+
+\lstset{tabsize=2}
 
 \title{Improving search for Packagist}
 
@@ -26,31 +31,63 @@
 
 \section{Implementation}
 
-Our implementation consists of 4 main parts, a \emph{downloader} for getting all data off Packagist, an \emph{indexer} to create the search index, a \emph{ranker} that commputes the relevance of each package, and a \emph{searcher} to get the final search results. We also include a simple front end for the searcher, but that component is optional. In the following sections, we will discuss each of these components in more detail.
+Our implementation consists of 4 main parts, a \emph{downloader} for getting all data off Packagist, an \emph{indexer} to create the search index, a \emph{ranker} that commputes the relevance of each package, and a \emph{searcher} to get the final search results. We also include a simple front end for the searcher, but that component is optional. In the following sections, we will discuss each of these components in more detail. A more usage-specific introduction can be found in the project's README.
 
 For our data structure, we opted to use flat files using filenames as our indexing mechanism. This gives reasonable performance at very little implementation cost.
 
 \subsection{Downloader}
 
+We retrieve a list of packages and the meta-data for all packages from Packagist, using their API~\cite{packagist-api}. We parse the responses using the Jsoncpp library. Overall, we do 1 HTTP request to retrieve the list of packages, and then one more for each individual package. All versions are retrieved at once.
+
+While the above means that we will be hitting the API over 200,000 times, but since all responses are cached to static files, local disk will likely be a more severe bottleneck in performance and slow us down enough not to be a hassle to the remote server.
+
 \subsection{Indexer}
+\label{sec:indexer}
+
+In order for our searcher to be fast and accurate, we create an index on our dataset. We use 3 indices: 2 keyword based indices for the package description and package keywords, and a reverse dependency index. Additionally, we create a file containing a list of all valid packages.
+
+For the keyword indices, we create a file for each keyword, and in it write the name of every package that references that keyword. For its name we use the (hexadecimal) MD5 hash of the filename, in order to avoid weird issues with invalid names. We use OpenSSL implementation of MD5 for this, since it is available on most systems.
+
+The reverse dependecy index uses a similar approach, where we have a file for each package\footnote{Note: for efficiency we only create a file for packages that actually have dependents, which is about a third of the total.} and in it we have the list of packages that depend on it. Here we also hash the package name to get a filename. As a consequence of the way we index packages, each index happens to be sorted. We use this for the searching part.
+
 
 \subsection{Ranker}
 
-There are various metrics that could be used for the relative importance of a package. Packagist provides several; for example the number of downloads in the past week, or the number of stars its Github repository has. Both have its flaws; some packages have hugely inflated download counts due to continuous integration builds, and buying Github stars is not unheard of. %TODO: reference
+There are various metrics that could be used for the relative importance of a package. Packagist provides several; for example the number of downloads in the past week, or the number of stars its Github repository has. Both have its flaws; some packages have hugely inflated download counts due to continuous integration builds, and buying Github stars is not unheard of.\footnote{A quick Google search brings you to \url{http://githubstars.com/}, which apparantly sells exactly this.}
 
-Instead of using one of the provided metrics, we instead opted to use a packages pagerank %TODO: reference pagerank
+Instead of using one of the provided metrics, we instead opted to use a package's pagerank~\cite{pagerank}
 in the dependency graph. In this graph, each package is a node and a directed edge from $a$ to $b$ exists if $a$ depends on $b$. For these purposes, we ignore version constraints, and group all the dependencies of all packages together.
 
 The rationale behind this is the same as with the download count: more people use it, so it is probably more important. However, in contrast to the download count, it is influenced less by CI systems. This system too could be gamed, by uploading countless dummy packages that depend on your main one, but this is easily discovered, and not currently a problem.
 
-Computing the actual pagerank is relatively cheap, since a dependency contains very few cycles.\footnote{a}
-
+Computing the actual pagerank is relatively cheap, since a dependency contains very few cycles~\footnote{Intuitively, there should be no cycles, but there are some split-up libraries where some parts depend upon each other.} and the pagerank stabilizes almost immediately. Rather than implementing pagerank ourselves we use the NetworkX~\cite{networkx} Python library to do this for us. We then save the resulting weights in a file, sorted on package name.
 
 
 \subsection{Searcher}
 
+Our search component takes a search request, and then prints a newline-delimited ordered list of packages to the standard output. We chose to use Json files as our input for queries, since we can easily express complicated queries in it, and do not have to do complicated command-line escaping to communicate. A sample of our format is shown below:
+
+\lstinputlisting{../search-sample.json}
+
+Here we see a list of terms, which each have a word they look for, and a type which indicates which index will be looked into. Both \texttt{keyword} and \texttt{description} use the keyword indices described in the previous section, and \texttt{name} does a substring match on the name of the package. All types can occur multiple times.
+
+Additionally, we see the \texttt{conjunctive} option, which is optional and can specify whether a result needs to match all predicates (false, default) or any.
+
+Efficiency is paramount for this component since it needs to happen in real time. For the following section, we are going to assume that the time to read a package name is constant, that we have $m$ packages in our data set, and that we have $n$ results for a query and $k$ terms in total. It should be noted that by necessity, $m \geq n$.
+
+The keyword searches are simply reading in a file and returning all $n$ matching packages. Consequently, it is simply $O(n)$. Searching on the name requires reading in all the package names, and performing a substring search on each of them. This is a linear operation on a constant bounded size, since package names are typically limited in length. Thus, the only real complexity here is $O(m)$, reading in all packages.
+
+We process each search term individually, and then combine them. As mentioned in \autoref{sec:indexer}, all of our indices are sorted and thus produce sorted result lists. We can then combine each pair in $O(n_1 + n_2)$ time, both conjunctively and disjunctively, using C++ standard library algorithms. This is still linear in the number of results.
+
+Using the above, it is easy to see that we have an upper bound of $O(km)$ for constructing the result set.
+
+For ranking results, we need to match each package to its rank number. We can do this in $O(m)$ time by using the fact that both the resultlist and the ranklist are sorted, iterating over the latter and advancing the first upon matching. Then we can finally sort the list in $O(n \log n)$ using any sorting algorithm\footnote{We use the sorting algorithm from \texttt{glibc} which is a variation on quicksort, but any algorithm will do.} and output the result.
+
 \section{Analysis}
 
 \section{Conclusion}
+
+\bibliography{bibliography}{}
+\bibliographystyle{plain}
 
 \end{document}
