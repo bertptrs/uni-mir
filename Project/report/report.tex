@@ -104,6 +104,8 @@ For the purpose of testing, we created a simple web front-end for our search eng
 
 The results are shown with their description fields, as well as their latest stable version, if applicable. For comparing versions, we use Composer itself, and the mark-up is slightly enhanced with Twitter Bootstrap, both installed using composer.
 
+Our search front-end can be used with the PHP built-in webserver or otherwise PHP running webserver, by navigating to the index. Additionally, one may use any CGI-capable webserver and using \texttt{index2.php}, which has the proper CGI flags.
+
 \section{Analysis}
 
 In this section, we will discuss some details about the retrieved data, and compare some results between the native Packagist search and our own search.
