@@ -11,6 +11,7 @@ To compile and run this program, you need:
 - cURL (with development headers)
 - Python3
 - NetworkX for Python 3
+- Jsoncpp (sources included in build)
 
 This all can be available on ISSC machines, but requires some setup. You
 can `source environment_issc` to attempt to set this up automatically,
